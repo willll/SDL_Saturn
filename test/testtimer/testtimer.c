@@ -92,6 +92,7 @@ int main()
 		sprintf(text_buffer, "Could not create timer 2");
 		slPrint(text_buffer, slLocate (1,line++));
 	}
+	
 	t3 = SDL_AddTimer(233, callback, (void*)3);
 	if(!t3) {
 		sprintf(text_buffer, "Could not create timer 3");
@@ -101,10 +102,12 @@ int main()
 	/* Wait 10 seconds */
 	sprintf(text_buffer, "Waiting 10 seconds");
 	slPrint(text_buffer, slLocate (1,line++));
+
 	SDL_Delay(10*1000);
 
 	sprintf(text_buffer, "Removing timer 1 and waiting 5 more seconds");
 	slPrint(text_buffer, slLocate (1,line++));
+
 	SDL_RemoveTimer(t1);
 
 	SDL_Delay(5*1000);
