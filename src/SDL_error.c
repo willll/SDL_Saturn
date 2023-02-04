@@ -122,7 +122,9 @@ void SDL_SetError (const char *fmt, ...)
 		}
 	}
 	va_end(ap);
-
+#ifdef ENABLE_SATURN
+  	slPrint(SDL_GetError(), slLocate (1,1));
+#else
 #ifndef DISABLE_STDIO
 	/* If we are in debug mode, print out an error message */
 #ifdef DEBUG_ERROR
@@ -133,6 +135,7 @@ void SDL_SetError (const char *fmt, ...)
 	}
 #endif
 #endif /* !DISABLE_STDIO */
+#endif /* !ENABLE_SATURN */
 }
 
 /* Print out an integer value to a UNICODE buffer */
