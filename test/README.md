@@ -4,7 +4,6 @@ These are test programs for the SDL library:
   helloworld  Check init
 
 	[testver](./testver/testver.png) Check the version and dynamic loading and endianness
-
 	[testtypes](./testtypes/testtypes.png)	Check to see if the data types are the correct size
 
 	testhread	Hacked up test of multi-threading
