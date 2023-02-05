@@ -120,8 +120,10 @@ void SDL_SYS_TimerQuit()
 
 int SDL_SYS_StartTimer()
 {
-	SDL_SetError("Internal logic error: DC uses threaded timer");
-	return(-1);
+  TIM_FRT_INIT(8); // 8, 32 or 128
+  TIM_FRT_SET_16(0);
+
+	return 0;
 }
 
 void SDL_SYS_StopTimer()

@@ -97,7 +97,7 @@ int SDL_InitSubSystem(Uint32 flags)
 #else
 	if ( flags & SDL_INIT_AUDIO ) {
 		SDL_SetError("SDL not built with audio support");
-		return(-1);
+		//return(-1);
 	}
 #endif
 
@@ -107,12 +107,14 @@ int SDL_InitSubSystem(Uint32 flags)
 		SDL_StartTicks();
 		ticks_started = 1;
 	}
+
 	if ( (flags & SDL_INIT_TIMER) && !(SDL_initialized & SDL_INIT_TIMER) ) {
 		if ( SDL_TimerInit() < 0 ) {
 			return(-1);
 		}
 		SDL_initialized |= SDL_INIT_TIMER;
 	}
+
 #else
 	if ( flags & SDL_INIT_TIMER ) {
 		SDL_SetError("SDL not built with timer support");
