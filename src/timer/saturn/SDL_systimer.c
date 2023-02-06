@@ -30,7 +30,7 @@ static char rcsid =
  "@(#) $Id$";
 #endif
 
-//#include <kos.h>
+#include <limits.h>
 
 #include "SDL_thread.h"
 #include "SDL_timer.h"
@@ -67,20 +67,31 @@ Uint32 SDL_GetTicks(void)
 //--------------------------------------------------------------------------------------------------------------------------------------
 void SDL_Delay(Uint32 ms)
 {
+    char buffer[256];
     ms*=1000; // milliseconds to microseconds
-    Uint32 tmp = TIM_FRT_CNT_TO_MCR(TIM_FRT_GET_16());
-    Uint32 duration=0;
+    Uint32 count = TIM_FRT_MCR_TO_CNT(ms);
 
-    while(duration<=ms)
-    {
-        Uint32 tmp2 = TIM_FRT_CNT_TO_MCR(TIM_FRT_GET_16());
-        if(tmp2>tmp)
-            duration=tmp2-tmp;
-        else if(tmp2<tmp)
-            duration=(0xffffffff-tmp)+tmp2;
+    Uint16 trucount = count / USHRT_MAX;
+    Uint16 remaining = count - trucount;
+
+    Uint16 tmpcount = 0;
+    Uint16 diff = 0;
+
+    while(trucount) {
+      TIM_FRT_SET_16(0);
+      diff = USHRT_MAX;
+      tmpcount = TIM_FRT_GET_16();
+
+      while(USHRT_MAX - tmpcount <= diff) {
+        diff = USHRT_MAX - tmpcount;
+        tmpcount = TIM_FRT_GET_16();
+      }
+      --trucount;
     }
 
-//    sc_usleep(delay);
+    // whatever ...
+    TIM_FRT_SET_16(0);
+    while((remaining) > TIM_FRT_GET_16());
 }
 
 void SDL_StartTicks()
@@ -106,8 +117,9 @@ int SDL_SYS_TimerInit()
 {
 	timer_alive = 1;
 
-  TIM_FRT_INIT(TIM_CKS_32);
-  TIM_FRT_SET_16(0);
+  //set_imask(0);
+
+  TIM_FRT_INIT(128);
 
 	return 0;
 }
@@ -120,7 +132,7 @@ void SDL_SYS_TimerQuit()
 
 int SDL_SYS_StartTimer()
 {
-  TIM_FRT_INIT(8); // 8, 32 or 128
+  //TIM_FRT_INIT(32); // 8, 32 or 128
   TIM_FRT_SET_16(0);
 
 	return 0;
