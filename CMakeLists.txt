@@ -14,8 +14,11 @@ set( SEGASGL $ENV{SATURN_SGL} )
 
 set( SATURN_COMMON $ENV{SATURN_COMMON} )
 set( SATURN_CMAKE $ENV{SATURN_CMAKE} )
+set( SATURN_ROOT $ENV{SATURN_ROOT} )
 
 set( SDL_LIB ${CMAKE_CURRENT_SOURCE_DIR} )
+
+set( SDL_DEST_DIR ${SATURN_ROOT}/SDL )
 
 project( SDL VERSION 1.0
           DESCRIPTION "Sega Saturn SDL 1.2.5"
@@ -89,7 +92,6 @@ set( SOURCES
 
   )
 
-
 add_compile_definitions( MODEL_S
                         _SH
                         DISABLE_AUDIO
@@ -137,6 +139,9 @@ target_link_libraries( sdl PUBLIC ${SEGALIB}/lib/sega_sat.a )
 target_link_libraries( sdl PUBLIC ${SEGALIB}/lib/sega_sys.a )
 target_link_libraries( sdl PUBLIC ${SEGALIB}/lib/sega_cdc.a )
 
-set_target_properties( sdl PROPERTIES PREFIX "" )
+set_target_properties( sdl PROPERTIES PREFIX "lib" )
 
 install( TARGETS sdl DESTINATION lib )
+install( DIRECTORY include/ DESTINATION include )
+install( DIRECTORY src/ DESTINATION src )
+install( DIRECTORY cmake/ DESTINATION ${SATURN_CMAKE} )

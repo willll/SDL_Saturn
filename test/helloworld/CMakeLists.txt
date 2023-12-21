@@ -30,27 +30,21 @@ set(cxx_flags
          )
 
 set(SOURCES
-  ${SATURN_COMMON}/crt0.s
-  helloworld.c
-  )
+    ${SATURN_COMMON}/crt0.s
+    helloworld.c )
 
 set(CD_FILES
-      0.bin
-    )
+      0.bin )
 
 add_compile_definitions(
                         MODEL_S
-                        _SH
-                        )
+                        _SH )
 
 add_executable( ${TARGET_NAME}.elf ${SOURCES} )
 
-message("Looking for SDL : ${SDL_LIB}")
-
 target_include_directories(
     ${TARGET_NAME}.elf PUBLIC
-    ${SDL_LIB}
-    ${SDL_LIB}/include
+    ${SDL_Saturn_INCLUDES}
     ${SEGALIB}/include
     ${SEGASGL}/include
     )
@@ -68,9 +62,12 @@ target_link_options(
     "SHELL:-lc -lgcc -lm"
 )
 
-target_link_libraries( ${TARGET_NAME}.elf PUBLIC /saturn/SDL/lib//sdl.a )
+target_link_libraries( ${TARGET_NAME}.elf PUBLIC ${SDL_Saturn_LIBRARIES} )
 
-add_custom_target(run_${TARGET_NAME} ALL DEPENDS ${TARGET_NAME}.elf ${TARGET_NAME}.bin IP.BIN)
+add_custom_target(run_${TARGET_NAME} ALL DEPENDS
+                  ${TARGET_NAME}.elf
+                  ${TARGET_NAME}.bin
+                  IP.BIN )
 
 add_custom_command(OUTPUT ${TARGET_NAME}.bin
                    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
@@ -86,6 +83,7 @@ add_custom_command(OUTPUT IP.BIN
 target_link_libraries( ${TARGET_NAME}.elf PUBLIC ${SEGASGL}/lib/sglarea.o )
 target_link_libraries( ${TARGET_NAME}.elf PUBLIC ${SEGASGL}/lib/libsgl.a )
 target_link_libraries( ${TARGET_NAME}.elf PUBLIC ${SEGALIB}/lib/sega_mem.a )
+target_link_libraries( ${TARGET_NAME}.elf PUBLIC ${SEGALIB}/lib/sega_int.a )
 
 include(${SATURN_CMAKE}/install.cmake)
 include(${SATURN_CMAKE}/create_cd.cmake)

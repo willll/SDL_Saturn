@@ -44,3 +44,12 @@ These are test programs for the SDL library:
 	testgl		A very simple example of using OpenGL with SDL
 
 	testjoystick	List joysticks and watch joystick events
+
+# How to Build
+
+  rm -rf * && cmake -DCMAKE_BUILD_TYPE=Debug \
+        -DCMAKE_MODULE_PATH=/saturn/SDL_Saturn/cmake \
+        -DSDL_Saturn_LIBRARY=/saturn/SDL/lib \
+        -DSDL_Saturn_INCLUDE_DIR=/saturn/SDL/include \
+        -DCMAKE_TOOLCHAIN_FILE=$SATURN_CMAKE/sega_saturn.cmake \
+        -DCMAKE_INSTALL_PREFIX=/saturn/SDL/tests .. && make && make install

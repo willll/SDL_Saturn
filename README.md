@@ -26,7 +26,11 @@ https://github.com/libsdl-org/SDL
 
 Thanks!
 
+# How to Build
 
+rm -rf * && cmake -DCMAKE_BUILD_TYPE=Debug \
+      -DCMAKE_TOOLCHAIN_FILE=$SATURN_CMAKE/sega_saturn.cmake \
+      -DCMAKE_INSTALL_PREFIX=/saturn/SDL .. && make && make install
 
 # Simple DirectMedia Layer (SDL) Version 1.2
 

@@ -305,7 +305,7 @@ SDL_Surface *SAT_SetVideoMode(_THIS, SDL_Surface *current,
     }
 
     slInitSystem(tv_mode, NULL, 1);
-    
+
     slInitBitMap(bmNBG1, BM_512x256, (void *)VDP2_VRAM_A0);
     slBMPaletteNbg1(1);
     extern Uint16 VDP2_RAMCTL;
@@ -444,7 +444,7 @@ SDL_Surface *SAT_SetVideoMode(_THIS, SDL_Surface *current,
     }
   }
 
-  int SAT_FillRect (SDL_Surface *dst, SDL_Rect *dstrect, Uint32 color)
+  int SAT_FillRect(SDL_Surface *dst, SDL_Rect *dstrect, Uint32 color)
   {
   	if((dst)!=NULL)
   		if((dstrect)!=NULL)
@@ -469,6 +469,7 @@ SDL_Surface *SAT_SetVideoMode(_THIS, SDL_Surface *current,
 
   	return 0;
   }
+  
   //--------------------------------------------------------------------------------------------------------------------------------------
   inline void Pal2CRAM( Uint16 *Pal_Data , void *Col_Adr , Uint32 suu )
   {

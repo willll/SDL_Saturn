@@ -32,11 +32,12 @@ static char rcsid =
 
 #include <limits.h>
 
-#include "SDL_thread.h"
+//#include "SDL_thread.h"
 #include "SDL_timer.h"
 #include "SDL_error.h"
 #include "../SDL_timer_c.h"
 
+#include <sega_int.h>
 #include <sega_tim.h>
 
 static unsigned start;
@@ -49,21 +50,25 @@ static int timer_alive = 0;
 	ms  = jif * 1000/HZ
 */
 
-Uint32 previousmillis, previouscount;
+static Uint32 previouscount=0;
+static Uint16 previousmillis=0;
+
+//void Time0Int(void);
 
 //--------------------------------------------------------------------------------------------------------------------------------------
 Uint32 SDL_GetTicks(void)
 {
-    Uint32 tmp = TIM_FRT_CNT_TO_MCR(TIM_FRT_GET_16())+previousmillis;
-    Uint32 tmp2 = tmp/ 1000;
+  Uint32 tmp = TIM_FRT_CNT_TO_MCR(TIM_FRT_GET_16())+previousmillis;
+  Uint32 tmp2 = tmp/ 1000;
 
-    previouscount += tmp2;
-    TIM_FRT_SET_16(0);
-    previousmillis= (tmp-(tmp2*1000));
-    //set_imask(imask);
-    //
-    return previouscount;
+  previouscount += tmp2;
+  TIM_FRT_SET_16(0);
+  previousmillis= (tmp-(tmp2*1000));
+  //set_imask(imask);
+  //
+  return previouscount;
 }
+
 //--------------------------------------------------------------------------------------------------------------------------------------
 void SDL_Delay(Uint32 ms)
 {
@@ -96,10 +101,8 @@ void SDL_Delay(Uint32 ms)
 
 void SDL_StartTicks()
 {
-	/* Set first ticks value */
-	//start = jiffies; // FIXME
+  TIM_T0_ENABLE();
 }
-
 
 static int RunTimer(void *unused)
 {
@@ -117,9 +120,7 @@ int SDL_SYS_TimerInit()
 {
 	timer_alive = 1;
 
-  //set_imask(0);
-
-  TIM_FRT_INIT(128);
+//  INT_SetScuFunc(INT_SCU_TIM0, Time0Int);
 
 	return 0;
 }
