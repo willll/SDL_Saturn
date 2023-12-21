@@ -84,7 +84,7 @@ target_link_options(
     "SHELL:-T${SATURN_COMMON}/Saturn.lnk"
 )
 
-target_link_libraries( ${TARGET_NAME}.elf PUBLIC /saturn/SDL/lib//sdl.a )
+target_link_libraries( ${TARGET_NAME}.elf PUBLIC ${SDL_Saturn_LIBRARIES} )
 
 add_custom_target(run_${TARGET_NAME} ALL DEPENDS ${TARGET_NAME}.elf ${TARGET_NAME}.bin IP.BIN)
 
