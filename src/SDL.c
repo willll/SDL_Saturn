@@ -134,7 +134,7 @@ int SDL_InitSubSystem(Uint32 flags)
 #else
 	if ( flags & SDL_INIT_JOYSTICK ) {
 		SDL_SetError("SDL not built with joystick support");
-		return(-1);
+		//return(-1);
 	}
 #endif
 
@@ -149,7 +149,7 @@ int SDL_InitSubSystem(Uint32 flags)
 #else
 	if ( flags & SDL_INIT_CDROM ) {
 		SDL_SetError("SDL not built with cdrom support");
-		return(-1);
+		//return(-1);
 	}
 #endif
 

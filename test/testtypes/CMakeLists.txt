@@ -49,25 +49,18 @@ set(cxx_flags
 
 set(SOURCES
   ${SATURN_COMMON}/crt0.s
-  testtypes.c
-  )
+  testtypes.c )
 
 set(CD_FILES
-      0.bin
-    )
+      0.bin )
 
-add_compile_definitions(
-                        MODEL_S
-                        _SH
-                        )
+add_compile_definitions( MODEL_S
+                         _SH )
 
 add_executable( ${TARGET_NAME}.elf ${SOURCES} )
 
-message("Looking for SDL : ${SDL_LIB}")
-
 target_include_directories(
     ${TARGET_NAME}.elf PUBLIC
-    ${SDL_LIB}
     ${SDL_LIB}/include
     ${SEGALIB}/include
     ${SEGASGL}/include

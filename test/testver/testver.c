@@ -20,6 +20,12 @@ static	volatile Uint16	PadData1  = 0x0000;
 
 static const unsigned short buffer_size = 256;
 
+void display() {
+	for(;;) {
+		slSynch();
+	}
+}
+
 int main()
 {
 	SDL_version compiled;
@@ -30,9 +36,9 @@ int main()
 
 	/* Initialize SDL */
 	if ( SDL_Init(SDL_INIT_EVERYTHING) < 0 ) {
-		sprintf(text_buffer, "Couldn't initialize SDL: %s",SDL_GetError());
-		slPrint(text_buffer, slLocate (1,line++));
-		SYS_Exit(1);
+		sprintf(text_buffer, "Couldn't initialize SDL: %s", SDL_GetError());
+		SDL_SetError(text_buffer);
+		for(;;);
 	}
 
 	SDL_SetVideoMode(320, 240, 8, SDL_HWSURFACE);
@@ -63,9 +69,7 @@ int main()
 		(SDL_BYTEORDER == SDL_LIL_ENDIAN) ? "little" : "big");
 	slPrint(text_buffer, slLocate (1,line++));
 
-	for(;;) {
-		slSynch();
-	}
+	display();
 
 	SDL_Quit();
 
