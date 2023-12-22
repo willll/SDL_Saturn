@@ -7,8 +7,11 @@
 
 #include "SDL.h"
 
-#define SCREEN_WIDTH	640
-#define SCREEN_HEIGHT	480
+#define SCREEN_WIDTH	320
+#define SCREEN_HEIGHT	240
+#define COLOR_DEPTH		8
+
+static const unsigned short buffer_size = 256;
 
 void WatchJoystick(SDL_Joystick *joystick)
 {
@@ -20,7 +23,7 @@ void WatchJoystick(SDL_Joystick *joystick)
 	SDL_Rect axis_area[2];
 
 	/* Set a video mode to display joystick axis position */
-	screen = SDL_SetVideoMode(SCREEN_WIDTH, SCREEN_HEIGHT, 16, 0);
+	screen = SDL_SetVideoMode(SCREEN_WIDTH, SCREEN_HEIGHT, COLOR_DEPTH, SDL_HWSURFACE);
 	if ( screen == NULL ) {
 		fprintf(stderr, "Couldn't set video mode: %s\n",SDL_GetError());
 		return;
@@ -149,29 +152,37 @@ int main(int argc, char *argv[])
 	int i;
 	SDL_Joystick *joystick;
 
+	int joystick_id = 0;
+
+	char text_buffer[buffer_size];
+	memset(text_buffer, 0, buffer_size);
+
 	/* Initialize SDL (Note: video is required to start event loop) */
 	if ( SDL_Init(SDL_INIT_VIDEO|SDL_INIT_JOYSTICK) < 0 ) {
-		fprintf(stderr, "Couldn't initialize SDL: %s\n",SDL_GetError());
-		exit(1);
+		sprintf(text_buffer, "Couldn't initialize SDL: %s\n", SDL_GetError());
+		SDL_SetError(text_buffer);
+		for(;;);
 	}
 
 	/* Print information about the joysticks */
 	printf("There are %d joysticks attached\n", SDL_NumJoysticks());
 	for ( i=0; i<SDL_NumJoysticks(); ++i ) {
 		name = SDL_JoystickName(i);
-		printf("Joystick %d: %s\n",i,name ? name : "Unknown Joystick");
+		sprintf(text_buffer, "Joystick %d: %s\n",i,name ? name : "Unknown Joystick");
+		SDL_SetError(text_buffer);
+		for(;;);
 	}
 
-	if ( argv[1] ) {
-		joystick = SDL_JoystickOpen(atoi(argv[1]));
-		if ( joystick == NULL ) {
-			printf("Couldn't open joystick %d: %s\n", atoi(argv[1]),
-			       SDL_GetError());
-		} else {
-			WatchJoystick(joystick);
-			SDL_JoystickClose(joystick);
-		}
+	joystick = SDL_JoystickOpen(joystick_id);
+	if ( joystick == NULL ) {
+			sprintf(text_buffer, "Couldn't open joystick %d: %s\n", joystick_id, SDL_GetError());
+			SDL_SetError(text_buffer);
+ 			for(;;);
+	} else {
+		WatchJoystick(joystick);
+		SDL_JoystickClose(joystick);
 	}
+
 	SDL_QuitSubSystem(SDL_INIT_VIDEO|SDL_INIT_JOYSTICK);
 
 	return(0);

@@ -40,8 +40,7 @@ static char rcsid =
 #include "../SDL_sysjoystick.h"
 #include "../SDL_joystick_c.h"
 
-//#include <dc/maple.h>
-//#include <dc/maple/controller.h>
+
 
 #define MAX_JOYSTICKS	8	/* only 2 are supported in the multimedia API */
 #define MAX_AXES	6	/* each joystick can have up to 6 axes */
