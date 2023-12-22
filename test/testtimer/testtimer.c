@@ -36,7 +36,7 @@ static Uint32 callback(Uint32 interval, void *param)
 
 int main()
 {
-	int desired;
+	int desired = 0;
 	SDL_TimerID t1, t2, t3;
 
 	memset(text_buffer, 0, buffer_size);
@@ -45,7 +45,8 @@ int main()
 	if ( SDL_Init(SDL_INIT_EVERYTHING) < 0 ) {
 		sprintf(text_buffer, "Couldn't initialize SDL: %s",SDL_GetError());
 		slPrint(text_buffer, slLocate (1,line++));
-		SYS_Exit(1);
+		SDL_SetError(text_buffer);
+		for(;;);
 	}
 
 	SDL_SetVideoMode(320, 240, 8, SDL_HWSURFACE);
@@ -72,8 +73,10 @@ int main()
 
 	/* Print the results */
 	if ( ticks ) {
-		sprintf(text_buffer, "Timer resolution: desired = %d ms, actual = %f ms",
-					desired, (double)(10*1000)/ticks );
+		sprintf(text_buffer,
+						"Timer resolution: desired = %d ms, actual = %f ms",
+						desired,
+						(double)(10*1000)/ticks );
 		slPrint(text_buffer, slLocate (1,line++));
 	}
 

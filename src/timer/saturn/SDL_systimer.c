@@ -72,25 +72,18 @@ Uint32 SDL_GetTicks(void)
 //--------------------------------------------------------------------------------------------------------------------------------------
 void SDL_Delay(Uint32 ms)
 {
-    char buffer[256];
-    ms*=1000; // milliseconds to microseconds
-    Uint32 count = TIM_FRT_MCR_TO_CNT(ms);
-
-    Uint16 trucount = count / USHRT_MAX;
-    Uint16 remaining = count - trucount;
-
     Uint16 tmpcount = 0;
     Uint16 diff = 0;
 
+    TIM_FRT_INIT(TIM_CKS_8);
+
+    Uint32 count = TIM_FRT_MCR_TO_CNT(ms * 1000);
+    Uint16 trucount = count / USHRT_MAX;
+    Uint16 remaining = count - trucount;
+
     while(trucount) {
       TIM_FRT_SET_16(0);
-      diff = USHRT_MAX;
-      tmpcount = TIM_FRT_GET_16();
-
-      while(USHRT_MAX - tmpcount <= diff) {
-        diff = USHRT_MAX - tmpcount;
-        tmpcount = TIM_FRT_GET_16();
-      }
+      TIM_FRT_DELAY_16(USHRT_MAX);
       --trucount;
     }
 
