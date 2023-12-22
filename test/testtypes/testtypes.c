@@ -20,7 +20,9 @@ int main()
 	if ( SDL_Init(SDL_INIT_EVERYTHING) < 0 ) {
 		sprintf(text_buffer, "Couldn't initialize SDL: %s",SDL_GetError());
 		slPrint(text_buffer, slLocate (1,line++));
-		SYS_Exit(1);
+		SDL_SetError(text_buffer);
+		for(;;);
+		SDL_Quit();
 	}
 	SDL_SetVideoMode(320, 240, 8, SDL_HWSURFACE);
 	SDL_ShowCursor(0);
