@@ -42,7 +42,7 @@ static char rcsid =
 
 #include	<per_x.h>
 
-#define MAX_JOYSTICKS	_MAX_PERIPHERAL	/* only 2 are supported in the multimedia API */
+#define MAX_JOYSTICKS	2	/* only 2 are supported in the multimedia API */
 #define MAX_AXES	2	/* each joystick can have up to 6 axes */
 #define MAX_BUTTONS	9	/* and 8 buttons                      */
 #define	MAX_HATS	0
@@ -172,18 +172,23 @@ int SDL_SYS_JoystickInit(void)
 {
   int nReturn = 0;
   __port = PER_OpenPort();
+  PER_GetPort( __port );
 
   if (!__port) {
     nReturn = -1;
   } else {
     for( Uint16 m = 0; m < _MAX_PORT; m++ ){
     			for( Uint16 n = 0; n < MAX_JOYSTICKS; n++ ){
-    				const SysDevice	*device = PER_GetDeviceA( &__port[m], n );
+    				const SysDevice	*device = PER_GetDeviceA( &(__port[m]), n );
             if (device) {
                 SYS_Joystick_addr[nReturn].port = m;
                 SYS_Joystick_addr[nReturn].index = n;
   				      SYS_Joystick_addr[nReturn].id = PER_GetID( device );
                 ++nReturn;
+            } else {
+              char text_buffer[128];
+              sprintf(text_buffer, "FAIL : m(%d) n(%d) id(%d)\n", m,n,__port[m].id);
+              SDL_SetError(text_buffer);
             }
     			}
   		}

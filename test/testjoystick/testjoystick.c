@@ -165,10 +165,12 @@ int main(int argc, char *argv[])
 	}
 
 	/* Print information about the joysticks */
-	printf("There are %d joysticks attached\n", SDL_NumJoysticks());
+	sprintf(text_buffer, "There are %d joysticks attached\n", SDL_NumJoysticks());
+	SDL_SetError(text_buffer);
+
 	for ( i=0; i<SDL_NumJoysticks(); ++i ) {
 		name = SDL_JoystickName(i);
-		sprintf(text_buffer, "Joystick %d: %s\n",i,name ? name : "Unknown Joystick");
+		sprintf(text_buffer, "Joystick %d: %s\n",i, name ? name : "Unknown Joystick");
 		SDL_SetError(text_buffer);
 		for(;;);
 	}

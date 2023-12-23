@@ -96,7 +96,7 @@ add_compile_definitions( MODEL_S
                         _SH
                         DISABLE_AUDIO
                         ENABLE_SATURN
-                        ENABLE_JOYSTICK
+                        #DISABLE_JOYSTICK
                         DISABLE_CDROM
                         DISABLE_THREADS
                         DISABLE_ENDIAN
