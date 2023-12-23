@@ -40,24 +40,128 @@ static char rcsid =
 #include "../SDL_sysjoystick.h"
 #include "../SDL_joystick_c.h"
 
+#include	<per_x.h>
 
+#define MAX_JOYSTICKS	_MAX_PERIPHERAL	/* only 2 are supported in the multimedia API */
+#define MAX_AXES	2	/* each joystick can have up to 6 axes */
+#define MAX_BUTTONS	9	/* and 8 buttons                      */
+#define	MAX_HATS	0
 
-#define MAX_JOYSTICKS	8	/* only 2 are supported in the multimedia API */
-#define MAX_AXES	6	/* each joystick can have up to 6 axes */
-#define MAX_BUTTONS	8	/* and 8 buttons                      */
-#define	MAX_HATS	2
+#define	MAX_DATA_SIZE	6
 
-#define	JOYNAMELEN	8
+static char	*device_name[] = {
+	"DIGITAL ","DIGITAL ","DIGITAL ","DIGITAL ",
+	"DIGITAL ","DIGITAL ","DIGITAL ","DIGITAL ",
+	"DIGITAL ","DIGITAL ","DIGITAL ","DIGITAL ",
+	"DIGITAL ","DIGITAL ","DIGITAL ","DIGITAL ",
+
+	"ANALOGUE","ANALOGUE","ANALOGUE","ANALOGUE",
+	"ANALOGUE","ANALOGUE","ANALOGUE","ANALOGUE",
+	"ANALOGUE","ANALOGUE","ANALOGUE","ANALOGUE",
+	"ANALOGUE","ANALOGUE","ANALOGUE","ANALOGUE",
+
+	"POINTING","POINTING","POINTING","POINTING",
+	"POINTING","POINTING","POINTING","POINTING",
+	"POINTING","POINTING","POINTING","POINTING",
+	"POINTING","POINTING","POINTING","POINTING",
+
+	"KEYBOARD","KEYBOARD","KEYBOARD","KEYBOARD",
+	"KEYBOARD","KEYBOARD","KEYBOARD","KEYBOARD",
+	"KEYBOARD","KEYBOARD","KEYBOARD","KEYBOARD",
+	"KEYBOARD","KEYBOARD","KEYBOARD","KEYBOARD",
+
+	"UNKNOWN ","UNKNOWN ","UNKNOWN ","UNKNOWN ",
+	"UNKNOWN ","UNKNOWN ","UNKNOWN ","UNKNOWN ",
+	"UNKNOWN ","UNKNOWN ","UNKNOWN ","UNKNOWN ",
+	"UNKNOWN ","UNKNOWN ","UNKNOWN ","UNKNOWN ",
+
+	"UNKNOWN ","UNKNOWN ","UNKNOWN ","UNKNOWN ",
+	"UNKNOWN ","UNKNOWN ","UNKNOWN ","UNKNOWN ",
+	"UNKNOWN ","UNKNOWN ","UNKNOWN ","UNKNOWN ",
+	"UNKNOWN ","UNKNOWN ","UNKNOWN ","UNKNOWN ",
+
+	"UNKNOWN ","UNKNOWN ","UNKNOWN ","UNKNOWN ",
+	"UNKNOWN ","UNKNOWN ","UNKNOWN ","UNKNOWN ",
+	"UNKNOWN ","UNKNOWN ","UNKNOWN ","UNKNOWN ",
+	"UNKNOWN ","UNKNOWN ","UNKNOWN ","UNKNOWN ",
+
+	"UNKNOWN ","UNKNOWN ","UNKNOWN ","UNKNOWN ",
+	"UNKNOWN ","UNKNOWN ","UNKNOWN ","UNKNOWN ",
+	"UNKNOWN ","UNKNOWN ","UNKNOWN ","UNKNOWN ",
+	"UNKNOWN ","UNKNOWN ","UNKNOWN ","UNKNOWN ",
+
+	"UNKNOWN ","UNKNOWN ","UNKNOWN ","UNKNOWN ",
+	"UNKNOWN ","UNKNOWN ","UNKNOWN ","UNKNOWN ",
+	"UNKNOWN ","UNKNOWN ","UNKNOWN ","UNKNOWN ",
+	"UNKNOWN ","UNKNOWN ","UNKNOWN ","UNKNOWN ",
+
+	"UNKNOWN ","UNKNOWN ","UNKNOWN ","UNKNOWN ",
+	"UNKNOWN ","UNKNOWN ","UNKNOWN ","UNKNOWN ",
+	"UNKNOWN ","UNKNOWN ","UNKNOWN ","UNKNOWN ",
+	"UNKNOWN ","UNKNOWN ","UNKNOWN ","UNKNOWN ",
+
+	"UNKNOWN ","UNKNOWN ","UNKNOWN ","UNKNOWN ",
+	"UNKNOWN ","UNKNOWN ","UNKNOWN ","UNKNOWN ",
+	"UNKNOWN ","UNKNOWN ","UNKNOWN ","UNKNOWN ",
+	"UNKNOWN ","UNKNOWN ","UNKNOWN ","UNKNOWN ",
+
+	"UNKNOWN ","UNKNOWN ","UNKNOWN ","UNKNOWN ",
+	"UNKNOWN ","UNKNOWN ","UNKNOWN ","UNKNOWN ",
+	"UNKNOWN ","UNKNOWN ","UNKNOWN ","UNKNOWN ",
+	"UNKNOWN ","UNKNOWN ","UNKNOWN ","UNKNOWN ",
+
+	"UNKNOWN ","UNKNOWN ","UNKNOWN ","UNKNOWN ",
+	"UNKNOWN ","UNKNOWN ","UNKNOWN ","UNKNOWN ",
+	"UNKNOWN ","UNKNOWN ","UNKNOWN ","UNKNOWN ",
+	"UNKNOWN ","UNKNOWN ","UNKNOWN ","UNKNOWN ",
+
+	"UNKNOWN ","UNKNOWN ","UNKNOWN ","UNKNOWN ",
+	"UNKNOWN ","UNKNOWN ","UNKNOWN ","UNKNOWN ",
+	"UNKNOWN ","UNKNOWN ","UNKNOWN ","UNKNOWN ",
+	"UNKNOWN ","UNKNOWN ","UNKNOWN ","UNKNOWN ",
+
+	"MD??????","MD3B    ","MD6B    ","MDMOUSE ",
+	"MD??????","MD??????","MD??????","MD??????",
+	"MD??????","MD??????","MD??????","MD??????",
+	"MD??????","MD??????","MD??????","MD??????",
+
+	"UNKNOWN ","UNKNOWN ","UNKNOWN ","UNKNOWN ",
+	"UNKNOWN ","UNKNOWN ","UNKNOWN ","UNKNOWN ",
+	"UNKNOWN ","UNKNOWN ","VR-GUN  ","UNKNOWN ",
+	"UNKNOWN ","UNKNOWN ","UNKNOWN ","NONE    ",
+};
+
+const static	int sdl_buttons[] = {
+	TRG_B,
+  TRG_C,
+	TRG_A,
+	TRG_START,
+  TRG_L,
+	TRG_Z,
+	TRG_Y,
+	TRG_X,
+  TRG_R
+};
+
+static SysPort	*__port = NULL;
 
 /* array to hold joystick ID values */
-static uint8_t	SYS_Joystick_addr[MAX_JOYSTICKS];
+struct joystick_index
+{
+  int port;
+  int index;
+  int id;
+};
+
+static struct joystick_index	SYS_Joystick_addr[MAX_JOYSTICKS];
 
 /* The private structure used to keep track of a joystick */
-// struct joystick_hwdata
-// {
-// 	cont_cond_t prev_cond;
-// 	int prev_buttons;
-// };
+struct joystick_hwdata
+{
+  int id;
+  int size;
+ 	trigger_t prev_trigger;
+};
 
 /* Function to scan the system for joysticks.
  * This function should set SDL_numjoysticks to the number of available
@@ -66,18 +170,40 @@ static uint8_t	SYS_Joystick_addr[MAX_JOYSTICKS];
  */
 int SDL_SYS_JoystickInit(void)
 {
+  int nReturn = 0;
+  __port = PER_OpenPort();
 
+  if (!__port) {
+    nReturn = -1;
+  } else {
+    for( Uint16 m = 0; m < _MAX_PORT; m++ ){
+    			for( Uint16 n = 0; n < MAX_JOYSTICKS; n++ ){
+    				const SysDevice	*device = PER_GetDeviceA( &__port[m], n );
+            if (device) {
+                SYS_Joystick_addr[nReturn].port = m;
+                SYS_Joystick_addr[nReturn].index = n;
+  				      SYS_Joystick_addr[nReturn].id = PER_GetID( device );
+                ++nReturn;
+            }
+    			}
+  		}
+  }
 
-	return(0);
+  for ( Uint16 i = nReturn; i < MAX_JOYSTICKS; i++ ) {
+    SYS_Joystick_addr[i].id = -1;
+  }
+
+	return nReturn;
 }
 
 /* Function to get the device-dependent name of a joystick */
 const char *SDL_SYS_JoystickName(int index)
 {
-  index;
-	//maple_device_t *dev;
-	// if (maple_compat_resolve(SYS_Joystick_addr[index],&dev,MAPLE_FUNC_CONTROLLER)!=0) return NULL;
-	// return dev->info.product_name;
+
+  if (SYS_Joystick_addr[index].id != -1) {
+    return device_name[SYS_Joystick_addr[index].id];
+  }
+
   return NULL;
 }
 
@@ -88,20 +214,20 @@ const char *SDL_SYS_JoystickName(int index)
  */
 int SDL_SYS_JoystickOpen(SDL_Joystick *joystick)
 {
-  joystick;
 	/* allocate memory for system specific hardware data */
-	// joystick->hwdata = (struct joystick_hwdata *) malloc(sizeof(*joystick->hwdata));
-	// if (joystick->hwdata == NULL)
-	// {
-	// 	SDL_OutOfMemory();
-	// 	return(-1);
-	// }
-	// memset(joystick->hwdata, 0, sizeof(*joystick->hwdata));
-  //
-	// /* fill nbuttons, naxes, and nhats fields */
-	// joystick->nbuttons = MAX_BUTTONS;
-	// joystick->naxes = MAX_AXES;
-	// joystick->nhats = MAX_HATS;
+	joystick->hwdata = (struct joystick_hwdata *) malloc(sizeof(*joystick->hwdata));
+	if (joystick->hwdata == NULL)
+	{
+		SDL_OutOfMemory();
+		return(-1);
+	}
+	memset(joystick->hwdata, 0, sizeof(*joystick->hwdata));
+
+	/* fill nbuttons, naxes, and nhats fields */
+	joystick->nbuttons = MAX_BUTTONS;
+	joystick->naxes = MAX_AXES;
+	joystick->nhats = MAX_HATS;
+
 	return(0);
 }
 
@@ -114,78 +240,56 @@ int SDL_SYS_JoystickOpen(SDL_Joystick *joystick)
 
 void SDL_SYS_JoystickUpdate(SDL_Joystick *joystick)
 {
-  joystick;
-// const	int sdl_buttons[] = {
-// 	CONT_C,
-// 	CONT_B,
-// 	CONT_A,
-// 	CONT_START,
-// 	CONT_Z,
-// 	CONT_Y,
-// 	CONT_X,
-// 	CONT_D
-// };
-//
-// 	uint8 addr;
-// 	cont_cond_t cond,*prev_cond;
-// 	int buttons,prev_buttons,i,changed;
-//
-// 	addr = SYS_Joystick_addr[joystick->index];
-// 	if (cont_get_cond(addr,&cond)<0) return;
-//
-// 	buttons = cond.buttons;
-// 	prev_buttons = joystick->hwdata->prev_buttons;
-// 	changed = buttons^prev_buttons;
-//
-// 	if ((changed)&(CONT_DPAD_UP|CONT_DPAD_DOWN|CONT_DPAD_LEFT|CONT_DPAD_RIGHT)) {
-// 		int hat = SDL_HAT_CENTERED;
-// 		if (buttons&CONT_DPAD_UP) hat|=SDL_HAT_UP;
-// 		if (buttons&CONT_DPAD_DOWN) hat|=SDL_HAT_DOWN;
-// 		if (buttons&CONT_DPAD_LEFT) hat|=SDL_HAT_LEFT;
-// 		if (buttons&CONT_DPAD_RIGHT) hat|=SDL_HAT_RIGHT;
-// 		SDL_PrivateJoystickHat(joystick, 0, hat);
-// 	}
-// 	if ((changed)&(CONT_DPAD2_UP|CONT_DPAD2_DOWN|CONT_DPAD2_LEFT|CONT_DPAD2_RIGHT)) {
-// 		int hat = SDL_HAT_CENTERED;
-// 		if (buttons&CONT_DPAD2_UP) hat|=SDL_HAT_UP;
-// 		if (buttons&CONT_DPAD2_DOWN) hat|=SDL_HAT_DOWN;
-// 		if (buttons&CONT_DPAD2_LEFT) hat|=SDL_HAT_LEFT;
-// 		if (buttons&CONT_DPAD2_RIGHT) hat|=SDL_HAT_RIGHT;
-// 		SDL_PrivateJoystickHat(joystick, 1, hat);
-// 	}
-//
-// 	for(i=0;i<sizeof(sdl_buttons)/sizeof(sdl_buttons[0]);i++) {
-// 		if (changed & sdl_buttons[i]) {
-// 			SDL_PrivateJoystickButton(joystick, i, (buttons & sdl_buttons[i])?SDL_PRESSED:SDL_RELEASED);
-// 		}
-// 	}
-//
-// 	prev_cond = &joystick->hwdata->prev_cond;
-// 	if (cond.joyx!=prev_cond->joyx)
-// 		SDL_PrivateJoystickAxis(joystick, 0, cond.joyx-128);
-// 	if (cond.joyy!=prev_cond->joyy)
-// 		SDL_PrivateJoystickAxis(joystick, 1, cond.joyy-128);
-// 	if (cond.rtrig!=prev_cond->rtrig)
-// 		SDL_PrivateJoystickAxis(joystick, 2, cond.rtrig);
-// 	if (cond.ltrig!=prev_cond->ltrig)
-// 		SDL_PrivateJoystickAxis(joystick, 3, cond.ltrig);
-// 	if (cond.joy2x!=prev_cond->joy2x)
-// 		SDL_PrivateJoystickAxis(joystick, 4, cond.joy2x-128);
-// 	if (cond.joy2y!=prev_cond->joy2y)
-// 		SDL_PrivateJoystickAxis(joystick, 5, cond.joy2y-128);
-//
-// 	joystick->hwdata->prev_buttons = buttons;
-// 	joystick->hwdata->prev_cond = cond;
+  if (SYS_Joystick_addr[joystick->index].id != -1) {
+    const int * port = &SYS_Joystick_addr[joystick->index].port;
+    const int index = SYS_Joystick_addr[joystick->index].index;
+    const SysDevice	*device = PER_GetDeviceA( port, index );
+
+    trigger_t tmp = PER_GetTrigger(device);
+
+    trigger_t prev_trigger =joystick->hwdata->prev_trigger;
+    joystick->hwdata->prev_trigger = tmp;
+    trigger_t changed = tmp^prev_trigger;
+
+    if (changed) {
+        if ((changed)&(TRG_UP|TRG_DOWN|TRG_LEFT|TRG_RIGHT)) {
+          int axis_0 = 0;
+          int axis_1 = 0;
+
+          if (tmp&TRG_UP)
+            axis_0 = 128;
+          else if (tmp&TRG_DOWN)
+            axis_0 = -128;
+
+          if (tmp&TRG_LEFT)
+            axis_1 = 128;
+          else if (tmp&TRG_RIGHT)
+            axis_1 = -128;
+
+          SDL_PrivateJoystickAxis(joystick, 0, axis_0);
+          SDL_PrivateJoystickAxis(joystick, 1, axis_1);
+        }
+
+      	for(int i = 0;i < sizeof(sdl_buttons)/sizeof(sdl_buttons[0]); i++) {
+      		if (changed & sdl_buttons[i]) {
+      			SDL_PrivateJoystickButton(joystick, i, (tmp & sdl_buttons[i])?SDL_PRESSED:SDL_RELEASED);
+      		}
+        }
+    }
+  }
 }
 
 /* Function to close a joystick after use */
 void SDL_SYS_JoystickClose(SDL_Joystick *joystick)
 {
-  joystick;
-	// if (joystick->hwdata != NULL) {
-	// 	/* free system specific hardware data */
-	// 	free(joystick->hwdata);
-	// }
+  if (SYS_Joystick_addr[joystick->index].id != -1) {
+    SYS_Joystick_addr[joystick->index].id = -1;
+  }
+
+	if (joystick->hwdata != NULL) {
+		/* free system specific hardware data */
+		free(joystick->hwdata);
+	}
 }
 
 /* Function to perform any system-specific joystick related cleanup */

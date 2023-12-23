@@ -148,9 +148,9 @@ void WatchJoystick(SDL_Joystick *joystick)
 
 int main(int argc, char *argv[])
 {
-	const char *name;
+	const char *name = NULL;
 	int i;
-	SDL_Joystick *joystick;
+	SDL_Joystick *joystick = NULL;
 
 	int joystick_id = 0;
 

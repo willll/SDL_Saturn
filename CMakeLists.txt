@@ -96,7 +96,7 @@ add_compile_definitions( MODEL_S
                         _SH
                         DISABLE_AUDIO
                         ENABLE_SATURN
-                        DISABLE_JOYSTICK
+                        ENABLE_JOYSTICK
                         DISABLE_CDROM
                         DISABLE_THREADS
                         DISABLE_ENDIAN
@@ -116,6 +116,7 @@ target_include_directories(
     src/events
     src/video
     src/cdrom
+    src/joystick
     include
     ${SEGALIB}/include
     ${SEGASGL}/include
@@ -138,6 +139,8 @@ target_link_libraries( sdl PUBLIC ${SEGASGL}/lib/libsgl.a )
 target_link_libraries( sdl PUBLIC ${SEGALIB}/lib/sega_sat.a )
 target_link_libraries( sdl PUBLIC ${SEGALIB}/lib/sega_sys.a )
 target_link_libraries( sdl PUBLIC ${SEGALIB}/lib/sega_cdc.a )
+target_link_libraries( sdl PUBLIC ${SEGALIB}/lib/sega_per.a )
+target_link_libraries( sdl PUBLIC ${SEGALIB}/lib/sega_clib.a )
 
 set_target_properties( sdl PROPERTIES PREFIX "lib" )
 
