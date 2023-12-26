@@ -3,9 +3,9 @@ These are test programs for the SDL library:
 
   helloworld  Check init
 
-	![testver](./testver/testver.png) Check the version and dynamic loading and endianness
+![testver](./testver/testver.png) Check the version and dynamic loading and endianness
 
-	![testtypes](./testtypes/testtypes.png)	Check to see if the data types are the correct size
+![testtypes](./testtypes/testtypes.png)	Check to see if the data types are the correct size
 
 	testhread	Hacked up test of multi-threading
 
@@ -43,7 +43,7 @@ These are test programs for the SDL library:
 
 	testgl		A very simple example of using OpenGL with SDL
 
-	testjoystick	List joysticks and watch joystick events
+![testjoystick](./testjoystick/testjoystick.png)	List joysticks and watch joystick events
 
 # How to Build
 
