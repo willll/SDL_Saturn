@@ -15,13 +15,13 @@ These are test programs for the SDL library:
 
 	testsem		Tests SDL's semaphore implementation
 
-	testtimer	Test the timer facilities
+![testtimer](./testtimer/testtimer.png)	Test the timer facilities
 
 	loopwave	Audio test -- loop playing a WAV file
 
 	testcdrom	Sample audio CD control program
 
-	testkeys	List the available keyboard keys
+	![testkeys](./testkeys/testkeys.png)	List the available keyboard keys
 
 	testvidinfo	Show the pixel format of the display
 
