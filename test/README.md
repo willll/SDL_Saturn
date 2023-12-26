@@ -21,7 +21,7 @@ These are test programs for the SDL library:
 
 	testcdrom	Sample audio CD control program
 
-	![testkeys](./testkeys/testkeys.png)	List the available keyboard keys
+![testkeys](./testkeys/testkeys.png)	List the available keyboard keys
 
 	testvidinfo	Show the pixel format of the display
 
