@@ -44,11 +44,15 @@ static char rcsid =
 #include	<sgl.h>
 #include	<sega_per.h>
 
-#define MAX_PORT	     2	/* 2 physical ports */
+#define MAX_PORT	     16	/* 2 physical ports */
 #define MAX_JOYSTICKS	 2	/* only 2 are supported in the multimedia API */
 #define MAX_AXES	     2	/* each joystick can have up to 6 axes */
 #define MAX_BUTTONS	   9	/* and 8 buttons                      */
 #define	MAX_HATS	     0
+
+#define SDL_MAX_AXIS  32767
+#define SDL_MIN_AXIS  -32768
+#define SDL_AXIS_STEP  128
 
 #define	MAX_DATA_SIZE	6
 
@@ -175,6 +179,9 @@ static int SDL_SYS_JoystickCount(void);
  */
 static int SDL_SYS_JoystickLoopUp(void)
 {
+  char text_buffer[256];
+  memset(text_buffer, 0, 256);
+
   int nReturn = 0;
 
   PerDigital	*pptr  = Smpc_Peripheral;
@@ -185,21 +192,34 @@ static int SDL_SYS_JoystickLoopUp(void)
   }
 
   if (!pptr) {
-    SDL_SetError("No Devices found");
+    SDL_SetError("No Devices found\n");
     SDL_LogCritical(SDL_LOG_CATEGORY_INPUT, "No Devices found\n");
     nReturn = -1;
   } else {
     for( Uint16 m = 0; m < MAX_PORT; m++ ) {
         pptr = &(Smpc_Peripheral[m]);
-        if (pptr) {
+        if (pptr && pptr->id != PER_ID_NotConnect) {
             SYS_Joystick_addr[nReturn].index = m;
             SYS_Joystick_addr[nReturn].id = pptr->id;
             SDL_LogVerbose(SDL_LOG_CATEGORY_INPUT, "Device[%d] ID(%d) : found\n", m, pptr->id);
+            SDL_SetError("Device found\n");
+            ++nReturn;
         } else {
-          SDL_LogVerbose(SDL_LOG_CATEGORY_INPUT, "Device[%d] : not found\n", m);
+            if(pptr) {
+              sprintf(text_buffer, "Device[%d] ID(%d): not found\n", m, pptr->id);
+            } else {
+              sprintf(text_buffer, "Device[%d]: not found\n", m);
+            }
+
+            SDL_LogCritical(SDL_LOG_CATEGORY_APPLICATION, text_buffer);
+            SDL_SetError(text_buffer);
         }
       }
   }
+
+  //SYS_Joystick_addr[nReturn].index = 0;
+  //SYS_Joystick_addr[nReturn].id = Smpc_Peripheral[0].id;
+  //nReturn = 1;
 
   SDL_LogInfo(SDL_LOG_CATEGORY_INPUT, "__FUNCTION__ : %d Device found\n", nReturn);
 
@@ -223,11 +243,7 @@ static int SDL_SYS_JoystickCount(void) {
  */
 int SDL_SYS_JoystickInit(void)
 {
-  int nReturn = 0;
-
-  slInitPeripheral();
-
-  nReturn = SDL_SYS_JoystickLoopUp();
+  int nReturn = MAX_JOYSTICKS;
 
 	return nReturn;
 }
@@ -306,25 +322,36 @@ void SDL_SYS_JoystickUpdate(SDL_Joystick *joystick)
     Sint16 push_changed = padp^prev_push;
 
     if (data_changed) {
-        if ((data_changed)&(PER_DGT_KU|PER_DGT_KD|PER_DGT_KL|PER_DGT_KR)) {
-          int axis_0 = 0;
-          int axis_1 = 0;
+    //    if ((data_changed)&(PER_DGT_KU|PER_DGT_KD|PER_DGT_KL|PER_DGT_KR)) {
+          Sint16 axis_0 = SDL_JoystickGetAxis(joystick, 0);
+          Sint16 axis_1 = SDL_JoystickGetAxis(joystick, 1);;
 
-          if (padd&PER_DGT_KU)
-            axis_0 = 128;
-          else if (padd&PER_DGT_KD)
-            axis_0 = -128;
-
-          if (padd&PER_DGT_KL)
-            axis_1 = 128;
-          else if (padd&PER_DGT_KR)
-            axis_1 = -128;
+          if (padd&PER_DGT_KD)
+            if (axis_1 > SDL_MAX_AXIS - SDL_AXIS_STEP)
+              axis_1 = SDL_MAX_AXIS;
+            else
+              axis_1 += SDL_AXIS_STEP;
+          else if (padd&PER_DGT_KU)
+            if (axis_1 < SDL_MIN_AXIS + SDL_AXIS_STEP)
+              axis_1 = SDL_MIN_AXIS;
+            else
+              axis_1 -= SDL_AXIS_STEP;
+          if (padd&PER_DGT_KR)
+            if (axis_0 > SDL_MAX_AXIS - SDL_AXIS_STEP)
+                axis_0 = SDL_MAX_AXIS;
+              else
+              axis_0 += SDL_AXIS_STEP;
+          else if (padd&PER_DGT_KL)
+            if (axis_0 < SDL_MIN_AXIS + SDL_AXIS_STEP)
+              axis_0 = SDL_MIN_AXIS;
+            else
+              axis_0 -= SDL_AXIS_STEP;
 
           SDL_PrivateJoystickAxis(joystick, 0, axis_0);
           SDL_PrivateJoystickAxis(joystick, 1, axis_1);
-        }
+        //}
 
-      	for(int i = 0;i < sizeof(sdl_buttons)/sizeof(sdl_buttons[0]); i++) {
+      	for(int i = 0; i < sizeof(sdl_buttons)/sizeof(sdl_buttons[0]); i++) {
       		if (data_changed & sdl_buttons[i]) {
       			SDL_PrivateJoystickButton(joystick, i, (padd & sdl_buttons[i])?SDL_PRESSED:SDL_RELEASED);
       		}

@@ -134,6 +134,9 @@ void WatchJoystick(SDL_Joystick *joystick, SDL_Surface *screen)
 		SDL_FillRect(screen, &axis_area[draw], 0xFFFF);
 
 		SDL_UpdateRects(screen, 2, axis_area);
+
+		// Wait for vsync
+		slSynch();
 	}
 }
 
