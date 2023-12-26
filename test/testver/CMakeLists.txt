@@ -65,8 +65,7 @@ add_executable( ${TARGET_NAME}.elf ${SOURCES} )
 
 target_include_directories(
     ${TARGET_NAME}.elf PUBLIC
-    ${SDL_LIB}
-    ${SDL_LIB}/include
+    ${SDL_Saturn_INCLUDES}
     ${SEGALIB}/include
     ${SEGASGL}/include
     )

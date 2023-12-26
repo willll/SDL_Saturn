@@ -3,16 +3,16 @@ cmake_minimum_required(VERSION 3.0)
 SET(CMAKE_SYSTEM_NAME Generic)
 set(CMAKE_VERBOSE_MAKEFILE ON)
 
-set( TARGET_NAME testtimer )
-set( TARGET_PATH testtimer )
+set( TARGET_NAME testalpha )
+set( TARGET_PATH testalpha )
 
 set(INSTALL_DESTINATION exe)
 
 project( ${TARGET_NAME} VERSION 1.0
-                  DESCRIPTION "Test the timer facilities"
+                  DESCRIPTION "Simple program:  Fill a colormap with gray and stripe it down the screen, Then move an alpha valued sprite around the screen."
                   LANGUAGES C CXX ASM)
 
-set( as_flags )
+set(as_flags )
 
 set( c_flags
         -Os -m2
@@ -49,7 +49,7 @@ set(cxx_flags
 
 set(SOURCES
   ${SATURN_COMMON}/crt0.s
-  testtimer.c
+  testalpha.c
   )
 
 set(CD_FILES
@@ -62,8 +62,6 @@ add_compile_definitions(
                         )
 
 add_executable( ${TARGET_NAME}.elf ${SOURCES} )
-
-message("Looking for SDL : ${SDL_LIB}")
 
 target_include_directories(
     ${TARGET_NAME}.elf PUBLIC
@@ -98,11 +96,17 @@ add_custom_command(OUTPUT IP.BIN
                   ARGS ${ip_maker_verbose} -o ${CMAKE_CURRENT_BINARY_DIR}/IP.BIN
                         -t ${TARGET_NAME} -p 2 )
 
+target_link_libraries( ${TARGET_NAME}.elf PUBLIC m )
 target_link_libraries( ${TARGET_NAME}.elf PUBLIC ${SEGASGL}/lib/sglarea.o )
 target_link_libraries( ${TARGET_NAME}.elf PUBLIC ${SEGASGL}/lib/libsgl.a )
 target_link_libraries( ${TARGET_NAME}.elf PUBLIC ${SEGALIB}/lib/sega_sat.a )
 target_link_libraries( ${TARGET_NAME}.elf PUBLIC ${SEGALIB}/lib/sega_sys.a )
 target_link_libraries( ${TARGET_NAME}.elf PUBLIC ${SEGALIB}/lib/sega_cdc.a )
+target_link_libraries( ${TARGET_NAME}.elf PUBLIC ${SEGALIB}/lib/sega_clib.a )
+#target_link_libraries( ${TARGET_NAME}.elf PUBLIC ${SEGALIB}/lib/sega_per.a )
+target_link_libraries( ${TARGET_NAME}.elf PUBLIC ${SEGALIB}/lib/sega_per_vbt.a )
+target_link_libraries( ${TARGET_NAME}.elf PUBLIC ${SEGALIB}/lib/sega_int.a )
+
 
 include(${SATURN_CMAKE}/install.cmake)
 include(${SATURN_CMAKE}/create_cd.cmake)
