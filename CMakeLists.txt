@@ -46,6 +46,7 @@ set( SOURCES
   src/SDL_fatal.c
   src/SDL_saturn.c
   src/SDL_getenv.c
+  src/SDL_log.c
   src/cdrom/SDL_cdrom.c
   src/cdrom/saturn/SDL_syscdrom.c
   src/file/SDL_rwops.c
@@ -135,12 +136,13 @@ target_link_options(
 )
 
 target_link_libraries( sdl PUBLIC ${SEGASGL}/lib/sglarea.o )
+target_link_libraries( sdl PUBLIC ${SEGALIB}/lib/sega_per_vbt.a )
 target_link_libraries( sdl PUBLIC ${SEGASGL}/lib/libsgl.a )
 target_link_libraries( sdl PUBLIC ${SEGALIB}/lib/sega_sat.a )
 target_link_libraries( sdl PUBLIC ${SEGALIB}/lib/sega_sys.a )
 target_link_libraries( sdl PUBLIC ${SEGALIB}/lib/sega_cdc.a )
-target_link_libraries( sdl PUBLIC ${SEGALIB}/lib/sega_per.a )
 target_link_libraries( sdl PUBLIC ${SEGALIB}/lib/sega_clib.a )
+target_link_libraries( sdl PUBLIC ${SEGALIB}/lib/sega_per.a )
 
 set_target_properties( sdl PROPERTIES PREFIX "lib" )
 

@@ -13,27 +13,19 @@
 
 static const unsigned short buffer_size = 256;
 
-void WatchJoystick(SDL_Joystick *joystick)
+void WatchJoystick(SDL_Joystick *joystick, SDL_Surface *screen)
 {
-	SDL_Surface *screen;
 	const char *name;
 	int i, done;
 	SDL_Event event;
 	int x, y, draw;
 	SDL_Rect axis_area[2];
 
-	/* Set a video mode to display joystick axis position */
-	screen = SDL_SetVideoMode(SCREEN_WIDTH, SCREEN_HEIGHT, COLOR_DEPTH, SDL_HWSURFACE);
-	if ( screen == NULL ) {
-		fprintf(stderr, "Couldn't set video mode: %s\n",SDL_GetError());
-		return;
-	}
-
 	/* Print info about the joystick we are watching */
 	name = SDL_JoystickName(SDL_JoystickIndex(joystick));
-	printf("Watching joystick %d: (%s)\n", SDL_JoystickIndex(joystick),
+	SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "Watching joystick %d: (%s)\n", SDL_JoystickIndex(joystick),
 	       name ? name : "Unknown Joystick");
-	printf("Joystick has %d axes, %d hats, %d balls, and %d buttons\n",
+	SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION,"Joystick has %d axes, %d hats, %d balls, and %d buttons\n",
 	       SDL_JoystickNumAxes(joystick), SDL_JoystickNumHats(joystick),
 	       SDL_JoystickNumBalls(joystick),SDL_JoystickNumButtons(joystick));
 
@@ -47,52 +39,51 @@ void WatchJoystick(SDL_Joystick *joystick)
 		while ( SDL_PollEvent(&event) ) {
 			switch (event.type) {
 			    case SDL_JOYAXISMOTION:
-				printf("Joystick %d axis %d value: %d\n",
-				       event.jaxis.which,
-				       event.jaxis.axis,
-				       event.jaxis.value);
-				break;
+						SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION,"Joystick %d axis %d value: %d\n",
+						       event.jaxis.which,
+						       event.jaxis.axis,
+						       event.jaxis.value);
+						break;
 			    case SDL_JOYHATMOTION:
-				printf("Joystick %d hat %d value:",
-				       event.jhat.which,
-				       event.jhat.hat);
-				if ( event.jhat.value == SDL_HAT_CENTERED )
-					printf(" centered");
-				if ( event.jhat.value & SDL_HAT_UP )
-					printf(" up");
-				if ( event.jhat.value & SDL_HAT_RIGHT )
-					printf(" right");
-				if ( event.jhat.value & SDL_HAT_DOWN )
-					printf(" down");
-				if ( event.jhat.value & SDL_HAT_LEFT )
-					printf(" left");
-				printf("\n");
-				break;
+						SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION,"Joystick %d hat %d value:\n",
+						       event.jhat.which,
+						       event.jhat.hat);
+						if ( event.jhat.value == SDL_HAT_CENTERED )
+							SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION," centered\n");
+						if ( event.jhat.value & SDL_HAT_UP )
+							SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION," up\n");
+						if ( event.jhat.value & SDL_HAT_RIGHT )
+							SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION," right\n");
+						if ( event.jhat.value & SDL_HAT_DOWN )
+							SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION," down\n");
+						if ( event.jhat.value & SDL_HAT_LEFT )
+							SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION," left\n");
+						break;
 			    case SDL_JOYBALLMOTION:
-				printf("Joystick %d ball %d delta: (%d,%d)\n",
-				       event.jball.which,
-				       event.jball.ball,
-				       event.jball.xrel,
-				       event.jball.yrel);
-				break;
+						SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION,"Joystick %d ball %d delta: (%d,%d)\n",
+						       event.jball.which,
+						       event.jball.ball,
+						       event.jball.xrel,
+						       event.jball.yrel);
+						break;
 			    case SDL_JOYBUTTONDOWN:
-				printf("Joystick %d button %d down\n",
-				       event.jbutton.which,
-				       event.jbutton.button);
-				break;
+						SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION,"Joystick %d button %d down\n",
+						       event.jbutton.which,
+						       event.jbutton.button);
+						break;
 			    case SDL_JOYBUTTONUP:
-				printf("Joystick %d button %d up\n",
-				       event.jbutton.which,
-				       event.jbutton.button);
-				break;
+						SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION,"Joystick %d button %d up\n",
+						       event.jbutton.which,
+						       event.jbutton.button);
+						break;
 			    case SDL_KEYDOWN:
-				if ( event.key.keysym.sym != SDLK_ESCAPE ) {
-					break;
-				}
+						if ( event.key.keysym.sym != SDLK_ESCAPE ) {
+							break;
+						}
 				/* Fall through to signal quit */
 			    case SDL_QUIT:
-				done = 1;
-				break;
+						done = 1;
+						break;
 			    default:
 				break;
 			}
@@ -151,6 +142,7 @@ int main(int argc, char *argv[])
 	const char *name = NULL;
 	int i;
 	SDL_Joystick *joystick = NULL;
+	SDL_Surface *screen =NULL;
 
 	int joystick_id = 0;
 
@@ -160,28 +152,41 @@ int main(int argc, char *argv[])
 	/* Initialize SDL (Note: video is required to start event loop) */
 	if ( SDL_Init(SDL_INIT_VIDEO|SDL_INIT_JOYSTICK) < 0 ) {
 		sprintf(text_buffer, "Couldn't initialize SDL: %s\n", SDL_GetError());
+		SDL_LogCritical(SDL_LOG_CATEGORY_APPLICATION, text_buffer);
+		SDL_SetError(text_buffer);
+		for(;;);
+	}
+
+	SDL_LogSetPriority(SDL_LOG_CATEGORY_APPLICATION, SDL_LOG_PRIORITY_VERBOSE);
+	SDL_LogSetPriority(SDL_LOG_CATEGORY_SYSTEM, SDL_LOG_PRIORITY_VERBOSE);
+	SDL_LogSetPriority(SDL_LOG_CATEGORY_VIDEO, SDL_LOG_PRIORITY_VERBOSE);
+
+	/* Set a video mode to display joystick axis position */
+	screen = SDL_SetVideoMode(SCREEN_WIDTH, SCREEN_HEIGHT, COLOR_DEPTH, SDL_HWSURFACE);
+	if ( screen == NULL ) {
+		sprintf(text_buffer, "Couldn't set video mode: %s\n",SDL_GetError());
+		SDL_LogCritical(SDL_LOG_CATEGORY_APPLICATION, text_buffer);
 		SDL_SetError(text_buffer);
 		for(;;);
 	}
 
 	/* Print information about the joysticks */
-	sprintf(text_buffer, "There are %d joysticks attached\n", SDL_NumJoysticks());
-	SDL_SetError(text_buffer);
+	SDL_LogVerbose(SDL_LOG_CATEGORY_APPLICATION, "There are %d joysticks attached\n", SDL_NumJoysticks());
 
 	for ( i=0; i<SDL_NumJoysticks(); ++i ) {
 		name = SDL_JoystickName(i);
-		sprintf(text_buffer, "Joystick %d: %s\n",i, name ? name : "Unknown Joystick");
-		SDL_SetError(text_buffer);
-		for(;;);
+		sprintf(text_buffer, "Joystick %d: %s\n",i, name ? name : "Unknown Joystick\n");
+		SDL_LogVerbose(SDL_LOG_CATEGORY_APPLICATION, text_buffer);
 	}
 
 	joystick = SDL_JoystickOpen(joystick_id);
 	if ( joystick == NULL ) {
 			sprintf(text_buffer, "Couldn't open joystick %d: %s\n", joystick_id, SDL_GetError());
+			SDL_LogCritical(SDL_LOG_CATEGORY_APPLICATION, text_buffer);
 			SDL_SetError(text_buffer);
  			for(;;);
 	} else {
-		WatchJoystick(joystick);
+		WatchJoystick(joystick, screen);
 		SDL_JoystickClose(joystick);
 	}
 

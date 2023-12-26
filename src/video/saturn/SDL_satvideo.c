@@ -40,7 +40,7 @@ static char rcsid =
 #include "SDL_sysvideo.h"
 #include "SDL_pixels_c.h"
 #include "SDL_events_c.h"
-
+#include "SDL_log.h"
 #include "SDL_satvideo.h"
 #include "SDL_satevents_c.h"
 #include "SDL_satmouse_c.h"
@@ -156,7 +156,7 @@ VideoBootStrap SAT_bootstrap = {
 
 int SAT_VideoInit(_THIS, SDL_PixelFormat *vformat)
 {
-  //fprintf(stderr, "WARNING: You are using the SDL saturn video driver!\n");
+  SDL_LogInfo(SDL_LOG_CATEGORY_VIDEO, "You are using the SDL saturn video driver!\n");
 
   /* Determine the screen depth (use default 8-bit depth) */
   /* we change this during the SDL_SetVideoMode implementation... */
@@ -303,6 +303,7 @@ SDL_Surface *SAT_SetVideoMode(_THIS, SDL_Surface *current,
       default:
       SDL_SetError("TODO !");
     }
+    SDL_LogVerbose(SDL_LOG_CATEGORY_VIDEO, "Init %d x %d x %d\n",  width, height, bpp);
 
     slInitSystem(tv_mode, NULL, 1);
 
@@ -469,7 +470,7 @@ SDL_Surface *SAT_SetVideoMode(_THIS, SDL_Surface *current,
 
   	return 0;
   }
-  
+
   //--------------------------------------------------------------------------------------------------------------------------------------
   inline void Pal2CRAM( Uint16 *Pal_Data , void *Col_Adr , Uint32 suu )
   {

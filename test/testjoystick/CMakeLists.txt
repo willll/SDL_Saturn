@@ -65,8 +65,7 @@ add_executable( ${TARGET_NAME}.elf ${SOURCES} )
 
 target_include_directories(
     ${TARGET_NAME}.elf PUBLIC
-    ${SDL_LIB}
-    ${SDL_LIB}/include
+    ${SDL_Saturn_INCLUDES}
     ${SEGALIB}/include
     ${SEGASGL}/include
     )
@@ -103,8 +102,10 @@ target_link_libraries( ${TARGET_NAME}.elf PUBLIC ${SEGALIB}/lib/sega_sat.a )
 target_link_libraries( ${TARGET_NAME}.elf PUBLIC ${SEGALIB}/lib/sega_sys.a )
 target_link_libraries( ${TARGET_NAME}.elf PUBLIC ${SEGALIB}/lib/sega_cdc.a )
 target_link_libraries( ${TARGET_NAME}.elf PUBLIC ${SEGALIB}/lib/sega_clib.a )
-target_link_libraries( ${TARGET_NAME}.elf PUBLIC ${SEGALIB}/lib/sega_per.a )
+#target_link_libraries( ${TARGET_NAME}.elf PUBLIC ${SEGALIB}/lib/sega_per.a )
+target_link_libraries( ${TARGET_NAME}.elf PUBLIC ${SEGALIB}/lib/sega_per_vbt.a )
 target_link_libraries( ${TARGET_NAME}.elf PUBLIC ${SEGALIB}/lib/sega_int.a )
+
 
 include(${SATURN_CMAKE}/install.cmake)
 include(${SATURN_CMAKE}/create_cd.cmake)

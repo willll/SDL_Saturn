@@ -36,16 +36,19 @@ static char rcsid =
 #include <stdio.h>		/* For the definition of NULL */
 
 #include "SDL_error.h"
+#include "SDL_log.h"
 #include "SDL_joystick.h"
 #include "../SDL_sysjoystick.h"
 #include "../SDL_joystick_c.h"
 
-#include	<per_x.h>
+#include	<sgl.h>
+#include	<sega_per.h>
 
-#define MAX_JOYSTICKS	2	/* only 2 are supported in the multimedia API */
-#define MAX_AXES	2	/* each joystick can have up to 6 axes */
-#define MAX_BUTTONS	9	/* and 8 buttons                      */
-#define	MAX_HATS	0
+#define MAX_PORT	     2	/* 2 physical ports */
+#define MAX_JOYSTICKS	 2	/* only 2 are supported in the multimedia API */
+#define MAX_AXES	     2	/* each joystick can have up to 6 axes */
+#define MAX_BUTTONS	   9	/* and 8 buttons                      */
+#define	MAX_HATS	     0
 
 #define	MAX_DATA_SIZE	6
 
@@ -132,23 +135,24 @@ static char	*device_name[] = {
 };
 
 const static	int sdl_buttons[] = {
-	TRG_B,
-  TRG_C,
-	TRG_A,
-	TRG_START,
-  TRG_L,
-	TRG_Z,
-	TRG_Y,
-	TRG_X,
-  TRG_R
+  //PER_DGT_KU,
+  //PER_DGT_KD,
+  //PER_DGT_KR,
+  //PER_DGT_KL,
+  PER_DGT_TA,
+  PER_DGT_TB,
+  PER_DGT_TC,
+  PER_DGT_ST,
+  PER_DGT_TX,
+  PER_DGT_TY,
+  PER_DGT_TZ,
+  PER_DGT_TR,
+  PER_DGT_TL,
 };
-
-static SysPort	*__port = NULL;
 
 /* array to hold joystick ID values */
 struct joystick_index
 {
-  int port;
   int index;
   int id;
 };
@@ -159,9 +163,58 @@ static struct joystick_index	SYS_Joystick_addr[MAX_JOYSTICKS];
 struct joystick_hwdata
 {
   int id;
-  int size;
- 	trigger_t prev_trigger;
+  Uint16	prev_data;
+	Uint16	prev_push;
 };
+
+static int SDL_SYS_JoystickLoopUp(void);
+static int SDL_SYS_JoystickCount(void);
+
+
+/* Function ...
+ */
+static int SDL_SYS_JoystickLoopUp(void)
+{
+  int nReturn = 0;
+
+  PerDigital	*pptr  = Smpc_Peripheral;
+
+  // reset all the inputs devices
+  for ( Uint16 i = 0; i < MAX_JOYSTICKS; i++ ) {
+   SYS_Joystick_addr[i].id = -1;
+  }
+
+  if (!pptr) {
+    SDL_SetError("No Devices found");
+    SDL_LogCritical(SDL_LOG_CATEGORY_INPUT, "No Devices found\n");
+    nReturn = -1;
+  } else {
+    for( Uint16 m = 0; m < MAX_PORT; m++ ) {
+        pptr = &(Smpc_Peripheral[m]);
+        if (pptr) {
+            SYS_Joystick_addr[nReturn].index = m;
+            SYS_Joystick_addr[nReturn].id = pptr->id;
+            SDL_LogVerbose(SDL_LOG_CATEGORY_INPUT, "Device[%d] ID(%d) : found\n", m, pptr->id);
+        } else {
+          SDL_LogVerbose(SDL_LOG_CATEGORY_INPUT, "Device[%d] : not found\n", m);
+        }
+      }
+  }
+
+  SDL_LogInfo(SDL_LOG_CATEGORY_INPUT, "__FUNCTION__ : %d Device found\n", nReturn);
+
+  return nReturn;
+}
+
+/* Function ...
+ */
+static int SDL_SYS_JoystickCount(void) {
+  int nReturn = 0;
+  for ( Uint16 i = 0; i < MAX_JOYSTICKS; i++ ) {
+   nReturn = nReturn + (SYS_Joystick_addr[i].id != -1);
+  }
+  return nReturn;
+}
 
 /* Function to scan the system for joysticks.
  * This function should set SDL_numjoysticks to the number of available
@@ -171,32 +224,10 @@ struct joystick_hwdata
 int SDL_SYS_JoystickInit(void)
 {
   int nReturn = 0;
-  __port = PER_OpenPort();
-  PER_GetPort( __port );
 
-  if (!__port) {
-    nReturn = -1;
-  } else {
-    for( Uint16 m = 0; m < _MAX_PORT; m++ ){
-    			for( Uint16 n = 0; n < MAX_JOYSTICKS; n++ ){
-    				const SysDevice	*device = PER_GetDeviceA( &(__port[m]), n );
-            if (device) {
-                SYS_Joystick_addr[nReturn].port = m;
-                SYS_Joystick_addr[nReturn].index = n;
-  				      SYS_Joystick_addr[nReturn].id = PER_GetID( device );
-                ++nReturn;
-            } else {
-              char text_buffer[128];
-              sprintf(text_buffer, "FAIL : m(%d) n(%d) id(%d)\n", m,n,__port[m].id);
-              SDL_SetError(text_buffer);
-            }
-    			}
-  		}
-  }
+  slInitPeripheral();
 
-  for ( Uint16 i = nReturn; i < MAX_JOYSTICKS; i++ ) {
-    SYS_Joystick_addr[i].id = -1;
-  }
+  nReturn = SDL_SYS_JoystickLoopUp();
 
 	return nReturn;
 }
@@ -219,21 +250,30 @@ const char *SDL_SYS_JoystickName(int index)
  */
 int SDL_SYS_JoystickOpen(SDL_Joystick *joystick)
 {
-	/* allocate memory for system specific hardware data */
-	joystick->hwdata = (struct joystick_hwdata *) malloc(sizeof(*joystick->hwdata));
-	if (joystick->hwdata == NULL)
-	{
-		SDL_OutOfMemory();
-		return(-1);
-	}
-	memset(joystick->hwdata, 0, sizeof(*joystick->hwdata));
+  int nReturn = -1;
 
-	/* fill nbuttons, naxes, and nhats fields */
-	joystick->nbuttons = MAX_BUTTONS;
-	joystick->naxes = MAX_AXES;
-	joystick->nhats = MAX_HATS;
+  if (SYS_Joystick_addr[joystick->index].id == -1) {
+    SDL_SYS_JoystickLoopUp();
+  }
 
-	return(0);
+  if (SYS_Joystick_addr[joystick->index].id != -1) {
+  	/* allocate memory for system specific hardware data */
+  	joystick->hwdata = (struct joystick_hwdata *) malloc(sizeof(*joystick->hwdata));
+  	if (joystick->hwdata == NULL)
+  	{
+  		SDL_OutOfMemory();
+  	} else {
+    	memset(joystick->hwdata, 0, sizeof(*joystick->hwdata));
+
+    	/* fill nbuttons, naxes, and nhats fields */
+    	joystick->nbuttons = MAX_BUTTONS;
+    	joystick->naxes = MAX_AXES;
+    	joystick->nhats = MAX_HATS;
+      nReturn = 0;
+    }
+  }
+
+	return(nReturn);
 }
 
 
@@ -245,30 +285,39 @@ int SDL_SYS_JoystickOpen(SDL_Joystick *joystick)
 
 void SDL_SYS_JoystickUpdate(SDL_Joystick *joystick)
 {
+  if (SYS_Joystick_addr[joystick->index].id == -1) {
+    SDL_SYS_JoystickLoopUp();
+  }
+
   if (SYS_Joystick_addr[joystick->index].id != -1) {
-    const int * port = &SYS_Joystick_addr[joystick->index].port;
+
     const int index = SYS_Joystick_addr[joystick->index].index;
-    const SysDevice	*device = PER_GetDeviceA( port, index );
+    PerDigital	*pptr  = &(Smpc_Peripheral[index]);
+    Sint16	padd = ~pptr->data;
+    Sint16	padp = ~pptr->push;
 
-    trigger_t tmp = PER_GetTrigger(device);
 
-    trigger_t prev_trigger =joystick->hwdata->prev_trigger;
-    joystick->hwdata->prev_trigger = tmp;
-    trigger_t changed = tmp^prev_trigger;
+    Sint16 prev_data =joystick->hwdata->prev_data;
+    joystick->hwdata->prev_data = padd;
+    Sint16 prev_push =joystick->hwdata->prev_push;
+    joystick->hwdata->prev_push = padp;
 
-    if (changed) {
-        if ((changed)&(TRG_UP|TRG_DOWN|TRG_LEFT|TRG_RIGHT)) {
+    Sint16 data_changed = padd^prev_data;
+    Sint16 push_changed = padp^prev_push;
+
+    if (data_changed) {
+        if ((data_changed)&(PER_DGT_KU|PER_DGT_KD|PER_DGT_KL|PER_DGT_KR)) {
           int axis_0 = 0;
           int axis_1 = 0;
 
-          if (tmp&TRG_UP)
+          if (padd&PER_DGT_KU)
             axis_0 = 128;
-          else if (tmp&TRG_DOWN)
+          else if (padd&PER_DGT_KD)
             axis_0 = -128;
 
-          if (tmp&TRG_LEFT)
+          if (padd&PER_DGT_KL)
             axis_1 = 128;
-          else if (tmp&TRG_RIGHT)
+          else if (padd&PER_DGT_KR)
             axis_1 = -128;
 
           SDL_PrivateJoystickAxis(joystick, 0, axis_0);
@@ -276,8 +325,8 @@ void SDL_SYS_JoystickUpdate(SDL_Joystick *joystick)
         }
 
       	for(int i = 0;i < sizeof(sdl_buttons)/sizeof(sdl_buttons[0]); i++) {
-      		if (changed & sdl_buttons[i]) {
-      			SDL_PrivateJoystickButton(joystick, i, (tmp & sdl_buttons[i])?SDL_PRESSED:SDL_RELEASED);
+      		if (data_changed & sdl_buttons[i]) {
+      			SDL_PrivateJoystickButton(joystick, i, (padd & sdl_buttons[i])?SDL_PRESSED:SDL_RELEASED);
       		}
         }
     }

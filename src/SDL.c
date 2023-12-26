@@ -32,6 +32,7 @@ static char rcsid =
 #include "SDL.h"
 #include "SDL_endian.h"
 #include "SDL_fatal.h"
+#include "SDL_log.h"
 #ifndef DISABLE_VIDEO
 #include "SDL_leaks.h"
 #endif
@@ -73,6 +74,7 @@ int SDL_InitSubSystem(Uint32 flags)
 #ifndef DISABLE_VIDEO
 	/* Initialize the video/event subsystem */
 	if ( (flags & SDL_INIT_VIDEO) && !(SDL_initialized & SDL_INIT_VIDEO) ) {
+    SDL_LogVerbose(SDL_LOG_CATEGORY_SYSTEM, "SDL_INIT_VIDEO\n");
 		if ( SDL_VideoInit(getenv("SDL_VIDEODRIVER"),
 		                   (flags&SDL_INIT_EVENTTHREAD)) < 0 ) {
 			return(-1);
@@ -89,6 +91,7 @@ int SDL_InitSubSystem(Uint32 flags)
 #ifndef DISABLE_AUDIO
 	/* Initialize the audio subsystem */
 	if ( (flags & SDL_INIT_AUDIO) && !(SDL_initialized & SDL_INIT_AUDIO) ) {
+    SDL_LogVerbose(SDL_LOG_CATEGORY_SYSTEM, "SDL_INIT_AUDIO\n");
 		if ( SDL_AudioInit(getenv("SDL_AUDIODRIVER")) < 0 ) {
 			return(-1);
 		}
@@ -109,6 +112,7 @@ int SDL_InitSubSystem(Uint32 flags)
 	}
 
 	if ( (flags & SDL_INIT_TIMER) && !(SDL_initialized & SDL_INIT_TIMER) ) {
+    SDL_LogVerbose(SDL_LOG_CATEGORY_SYSTEM, "SDL_INIT_TIMER\n");
 		if ( SDL_TimerInit() < 0 ) {
 			return(-1);
 		}
@@ -126,6 +130,7 @@ int SDL_InitSubSystem(Uint32 flags)
 	/* Initialize the joystick subsystem */
 	if ( (flags & SDL_INIT_JOYSTICK) &&
 	     !(SDL_initialized & SDL_INIT_JOYSTICK) ) {
+    SDL_LogVerbose(SDL_LOG_CATEGORY_SYSTEM, "SDL_INIT_JOYSTICK\n");
 		if ( SDL_JoystickInit() < 0 ) {
 			return(-1);
 		}
@@ -141,6 +146,7 @@ int SDL_InitSubSystem(Uint32 flags)
 #ifndef DISABLE_CDROM
 	/* Initialize the CD-ROM subsystem */
 	if ( (flags & SDL_INIT_CDROM) && !(SDL_initialized & SDL_INIT_CDROM) ) {
+    SDL_LogVerbose(SDL_LOG_CATEGORY_SYSTEM, "SDL_INIT_CDROM\n");
 		if ( SDL_CDROMInit() < 0 ) {
 			return(-1);
 		}
@@ -166,12 +172,17 @@ int SDL_Init(Uint32 flags)
 #endif
 
 #ifdef ENABLE_SATURN
-  MEM_Init( ( Uint32 )__heap, sizeof( __heap ));
+  SDL_LogVerbose(SDL_LOG_CATEGORY_SYSTEM, "ENABLE_SATURN\n");
+  _init_saturn();
 #endif
 
 	/* Clear the error message */
 	SDL_ClearError();
 
+  /* Initialize logs */
+  SDL_LogInit();
+
+  SDL_LogVerbose(SDL_LOG_CATEGORY_SYSTEM, "SDL_InitSubSystem\n");
 	/* Initialize the desired subsystems */
 	if ( SDL_InitSubSystem(flags) < 0 ) {
 		return(-1);
@@ -179,6 +190,7 @@ int SDL_Init(Uint32 flags)
 
 	/* Everything is initialized */
 	if ( !(flags & SDL_INIT_NOPARACHUTE) ) {
+    SDL_LogVerbose(SDL_LOG_CATEGORY_SYSTEM, "SDL_InstallParachute\n");
 		SDL_InstallParachute();
 	}
 
@@ -190,29 +202,34 @@ void SDL_QuitSubSystem(Uint32 flags)
 	/* Shut down requested initialized subsystems */
 #ifndef DISABLE_CDROM
 	if ( (flags & SDL_initialized & SDL_INIT_CDROM) ) {
+    SDL_LogVerbose(SDL_LOG_CATEGORY_SYSTEM, "SDL_CDROMQuit\n");
 		SDL_CDROMQuit();
 		SDL_initialized &= ~SDL_INIT_CDROM;
 	}
 #endif
 #ifndef DISABLE_JOYSTICK
 	if ( (flags & SDL_initialized & SDL_INIT_JOYSTICK) ) {
+    SDL_LogVerbose(SDL_LOG_CATEGORY_SYSTEM, "SDL_JoystickQuit\n");
 		SDL_JoystickQuit();
 		SDL_initialized &= ~SDL_INIT_JOYSTICK;
 	}
 #endif
 #ifndef DISABLE_TIMERS
 	if ( (flags & SDL_initialized & SDL_INIT_TIMER) ) {
+    SDL_LogVerbose(SDL_LOG_CATEGORY_SYSTEM, "SDL_TimerQuit\n");
 		SDL_TimerQuit();
 		SDL_initialized &= ~SDL_INIT_TIMER;
 	}
 #endif
 #ifndef DISABLE_AUDIO
 	if ( (flags & SDL_initialized & SDL_INIT_AUDIO) ) {
+    SDL_LogVerbose(SDL_LOG_CATEGORY_SYSTEM, "SDL_AudioQuit\n");
 		SDL_AudioQuit();
 		SDL_initialized &= ~SDL_INIT_AUDIO;
 	}
 #endif
 #ifndef DISABLE_VIDEO
+  SDL_LogVerbose(SDL_LOG_CATEGORY_SYSTEM, "SDL_VideoQuit\n");
 	if ( (flags & SDL_initialized & SDL_INIT_VIDEO) ) {
 		SDL_VideoQuit();
 		SDL_initialized &= ~SDL_INIT_VIDEO;

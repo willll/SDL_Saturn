@@ -6,8 +6,6 @@ set( SEGASGL $ENV{SATURN_SGL} )
 set( SATURN_COMMON $ENV{SATURN_COMMON} )
 set( SATURN_CMAKE $ENV{SATURN_CMAKE} )
 
-set( SDL_LIB /saturn/SDL )
-
 find_package(SDL_Saturn REQUIRED)
 
 project( test VERSION 1.0 )
