@@ -399,14 +399,8 @@ SDL_Surface *SAT_SetVideoMode(_THIS, SDL_Surface *current,
 
     for (i = 0; i < surface->h; i++)
     {
-      //		DMA_ScuMemCopy((unsigned char*)(VDP2_VRAM_A0 + (i<<9)), (unsigned char*)(surface->pixels + (i * screenWidth)), screenWidth); // vbt 20-22fps
-      //		SCU_DMAWait();
-      //		memcpyl((unsigned long*)(VDP2_VRAM_A0 + (i<<9)), (unsigned long*)(surface->pixels + (i * screenWidth)), screenWidth); // vbt : 22-24fps
-      // vbt : remttre la copie dma
-      //		slDMACopy((unsigned long*)surfacePtr,(void *)(VDP2_VRAM_A0 + (i<<9)),screenWidth);
       slDMACopy( (unsigned long*)surfacePtr, (void *)nbg1Ptr, surface->w ); // vbt � remettre !!!
       surfacePtr+=surface->w;
-      //		nb_unlock+=screenWidth;
       nbg1Ptr+=128;
     }
     slDMAWait();
@@ -420,7 +414,6 @@ SDL_Surface *SAT_SetVideoMode(_THIS, SDL_Surface *current,
   int SAT_SetColors(_THIS, int firstcolor, int ncolors, SDL_Color *colors)
   {
     Uint16	palo[256];
-    //	CHECKMALLOCRESULT(palo);
 
     for(int i=0;i<ncolors;i++)
     {
@@ -430,7 +423,6 @@ SDL_Surface *SAT_SetVideoMode(_THIS, SDL_Surface *current,
     Pal2CRAM(palo+14 , (void *)NBG0_COL_ADR , ncolors);
 
     return 1;
-    return(1);
   }
 
   /* Note:  If we are terminated, this could be called in the middle of
@@ -450,7 +442,6 @@ SDL_Surface *SAT_SetVideoMode(_THIS, SDL_Surface *current,
   	if((dst)!=NULL)
   		if((dstrect)!=NULL)
   		{
-  	//		slBMBoxFill(dstrect->x, dstrect->y, dstrect->x + dstrect->w - 1, dstrect->y + dstrect->h - 1, color);
   			Uint8*d = (Uint8*)dst->pixels + dstrect->x + dstrect->y * dst->w;
   			int w = dstrect->w;
   			int p = dst->pitch;
@@ -458,14 +449,11 @@ SDL_Surface *SAT_SetVideoMode(_THIS, SDL_Surface *current,
   			{
   				memset(d,color,dstrect->w);
   				d+=dst->pitch;
-  //				nb_unlock+=dst->pitch;
   			}
   		}
   		else
   		{
-  	//		slBMBoxFill(dstrect->x, dstrect->y, dstrect->x + dstrect->w - 1, dstrect->y + dstrect->h - 1, color);
   		   memset(dst->pixels, color, dst->w*dst->h);
-  //		   nb_unlock+=screenWidth*screenHeight;
   		}
 
   	return 0;

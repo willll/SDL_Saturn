@@ -106,6 +106,7 @@ add_compile_definitions( MODEL_S
                         NO_SIGNAL_H
                         DISABLE_STDIO
                         USE_DUFFS_LOOP
+                        USE_SPRITES
                         )
 
 add_library( sdl STATIC
