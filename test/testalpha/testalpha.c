@@ -10,7 +10,14 @@
 
 #include "SDL.h"
 
-#define FRAME_TICKS	(1000/30)		/* 30 frames/second */ 
+#define FRAME_TICKS	(1000/30)		/* 30 frames/second */
+
+#define SCREEN_WIDTH	320
+#define SCREEN_HEIGHT	224
+#define COLOR_DEPTH		8
+
+static const unsigned short buffer_size = 256;
+static const char* icon_image="icon.bmp";
 
 /* Create a "light" -- a yellowish surface with variable alpha */
 SDL_Surface *CreateLight(SDL_Surface *screen, int radius)
@@ -22,6 +29,8 @@ SDL_Surface *CreateLight(SDL_Surface *screen, int radius)
 	Uint16 skip;
 	Uint32 pixel;
 	SDL_Surface *light;
+	char text_buffer[buffer_size];
+	memset(text_buffer, 0, buffer_size);
 
 #ifdef LIGHT_16BIT
 	Uint16 *buf;
@@ -39,7 +48,10 @@ SDL_Surface *CreateLight(SDL_Surface *screen, int radius)
 	light = SDL_CreateRGBSurface(SDL_SWSURFACE, 2*radius, 2*radius, 32,
 			0xFF000000, 0x00FF0000, 0x0000FF00, alphamask);
 	if ( light == NULL ) {
-		fprintf(stderr, "Couldn't create light: %s\n", SDL_GetError());
+		sprintf(text_buffer, "Couldn't Create light\n",
+							SDL_GetError());
+		SDL_LogCritical(SDL_LOG_CATEGORY_APPLICATION, text_buffer);
+		SDL_SetError(text_buffer);
 		return(NULL);
 	}
 #endif
@@ -138,7 +150,9 @@ int LoadSprite(SDL_Surface *screen, char *file)
 	/* Load the sprite image */
 	sprite = SDL_LoadBMP(file);
 	if ( sprite == NULL ) {
-		fprintf(stderr, "Couldn't load %s: %s", file, SDL_GetError());
+		SDL_LogCritical(SDL_LOG_CATEGORY_APPLICATION,
+			 							"Couldn't load %s: %s",
+										file, SDL_GetError());
 		return(-1);
 	}
 
@@ -152,8 +166,9 @@ int LoadSprite(SDL_Surface *screen, char *file)
 	converted = SDL_DisplayFormat(sprite);
 	SDL_FreeSurface(sprite);
 	if ( converted == NULL ) {
-		fprintf(stderr, "Couldn't convert background: %s\n",
-							SDL_GetError());
+		SDL_LogCritical(SDL_LOG_CATEGORY_APPLICATION,
+			 							"Couldn't convert background: %s\n",
+										SDL_GetError());
 		return(-1);
 	}
 	sprite = converted;
@@ -162,8 +177,9 @@ int LoadSprite(SDL_Surface *screen, char *file)
 	backing = SDL_CreateRGBSurface(SDL_SWSURFACE, sprite->w, sprite->h, 8,
 								0, 0, 0, 0);
 	if ( backing == NULL ) {
-		fprintf(stderr, "Couldn't create background: %s\n",
-							SDL_GetError());
+			SDL_LogCritical(SDL_LOG_CATEGORY_APPLICATION,
+											"Couldn't create background: %s\n",
+											SDL_GetError());
 		SDL_FreeSurface(sprite);
 		return(-1);
 	}
@@ -172,8 +188,9 @@ int LoadSprite(SDL_Surface *screen, char *file)
 	converted = SDL_DisplayFormat(backing);
 	SDL_FreeSurface(backing);
 	if ( converted == NULL ) {
-		fprintf(stderr, "Couldn't convert background: %s\n",
-							SDL_GetError());
+		SDL_LogCritical(SDL_LOG_CATEGORY_APPLICATION,
+										"Couldn't convert background: %s\n",
+										SDL_GetError());
 		SDL_FreeSurface(sprite);
 		return(-1);
 	}
@@ -221,7 +238,7 @@ void MoveSprite(SDL_Surface *screen, SDL_Surface *light)
 		SDL_GetMouseState(&x, &y);
 		FlashLight(screen, light, x, y);
 	}
-	   
+
 	/* Move the sprite, bounce at the wall */
 	position.x += x_vel;
 	if ( (position.x < 0) || (position.x >= screen->w) ) {
@@ -247,7 +264,7 @@ void MoveSprite(SDL_Surface *screen, SDL_Surface *light)
 	/* Save the area behind the sprite */
 	updates[1] = position;
 	SDL_BlitSurface(screen, &updates[1], backing, NULL);
-	
+
 	/* Blit the sprite onto the screen */
 	updates[1] = position;
 	SDL_BlitSurface(sprite, NULL, screen, &updates[1]);
@@ -283,57 +300,74 @@ int main(int argc, char *argv[])
 	SDL_Event event;
 	SDL_Surface *light;
 	int mouse_pressed;
-	Uint32 ticks, lastticks; 
+	Uint32 ticks, lastticks;
+	char text_buffer[buffer_size];
+	memset(text_buffer, 0, buffer_size);
 
-	/* Initialize SDL */ 
+	/* Initialize SDL */
 	if ( SDL_Init(SDL_INIT_VIDEO) < 0 ) {
-		fprintf(stderr, "Couldn't initialize SDL: %s\n",SDL_GetError());
-		exit(1);
+		sprintf(text_buffer, "Couldn't initialize SDL: %s\n", SDL_GetError());
+		SDL_LogCritical(SDL_LOG_CATEGORY_APPLICATION, text_buffer);
+		SDL_SetError(text_buffer);
+		for(;;);
 	}
 	atexit(SDL_Quit);
+
+	SDL_LogSetPriority(SDL_LOG_CATEGORY_APPLICATION, SDL_LOG_PRIORITY_VERBOSE);
+	SDL_LogSetPriority(SDL_LOG_CATEGORY_SYSTEM, SDL_LOG_PRIORITY_VERBOSE);
+	SDL_LogSetPriority(SDL_LOG_CATEGORY_VIDEO, SDL_LOG_PRIORITY_VERBOSE);
+	SDL_LogSetPriority(SDL_LOG_CATEGORY_RENDER, SDL_LOG_PRIORITY_VERBOSE);
 
 	/* Alpha blending doesn't work well at 8-bit color */
 	info = SDL_GetVideoInfo();
 	if ( info->vfmt->BitsPerPixel > 8 ) {
 		video_bpp = info->vfmt->BitsPerPixel;
 	} else {
-		video_bpp = /*!!16*/12;
+		video_bpp = COLOR_DEPTH;
 	}
-	videoflags = SDL_SWSURFACE;
-	while ( argc > 1 ) {
-		--argc;
-		if ( strcmp(argv[argc-1], "-bpp") == 0 ) {
-			video_bpp = atoi(argv[argc]);
-			--argc;
-		} else
-		if ( strcmp(argv[argc], "-hw") == 0 ) {
-			videoflags |= SDL_HWSURFACE;
-		} else
-		if ( strcmp(argv[argc], "-warp") == 0 ) {
-			videoflags |= SDL_HWPALETTE;
-		} else
-		if ( strcmp(argv[argc], "-fullscreen") == 0 ) {
-			videoflags |= SDL_FULLSCREEN;
-		} else {
-			fprintf(stderr, 
-			"Usage: %s [-bpp N] [-warp] [-hw] [-fullscreen]\n",
-								argv[0]);
-			exit(1);
-		}
-	}
+	videoflags = (SDL_HWSURFACE | SDL_FULLSCREEN);
+	// while ( argc > 1 ) {
+	// 	--argc;
+	// 	if ( strcmp(argv[argc-1], "-bpp") == 0 ) {
+	// 		video_bpp = atoi(argv[argc]);
+	// 		--argc;
+	// 	} else
+	// 	if ( strcmp(argv[argc], "-hw") == 0 ) {
+	// 		videoflags |= SDL_HWSURFACE;
+	// 	} else
+	// 	if ( strcmp(argv[argc], "-warp") == 0 ) {
+	// 		videoflags |= SDL_HWPALETTE;
+	// 	} else
+	// 	if ( strcmp(argv[argc], "-fullscreen") == 0 ) {
+	// 		videoflags |= SDL_FULLSCREEN;
+	// 	} else {
+	// 		fprintf(stderr,
+	// 		"Usage: %s [-bpp N] [-warp] [-hw] [-fullscreen]\n",
+	// 							argv[0]);
+	// 		exit(1);
+	// 	}
+	// }
 
 	/* Set 640x480 video mode */
-	if ( (screen=SDL_SetVideoMode(640,480,video_bpp,videoflags)) == NULL ) {
-		fprintf(stderr, "Couldn't set 640x480x%d video mode: %s\n",
+	if ( (screen=SDL_SetVideoMode(SCREEN_WIDTH,
+																SCREEN_HEIGHT,
+																video_bpp,
+																videoflags)) == NULL ) {
+		sprintf(text_buffer, "Couldn't set %d x %d x %d video mode: %s\n",
+						SCREEN_WIDTH,SCREEN_HEIGHT,
 						video_bpp, SDL_GetError());
-		exit(2);
+		SDL_LogCritical(SDL_LOG_CATEGORY_APPLICATION, text_buffer);
+		SDL_SetError(text_buffer);
+		for(;;);
 	}
 
 	/* Set the surface pixels and refresh! */
 	if ( SDL_LockSurface(screen) < 0 ) {
-		fprintf(stderr, "Couldn't lock the display surface: %s\n",
+		sprintf(text_buffer, "Couldn't lock the display surface: %s\n",
 							SDL_GetError());
-		exit(2);
+		SDL_LogCritical(SDL_LOG_CATEGORY_APPLICATION, text_buffer);
+		SDL_SetError(text_buffer);
+		for(;;);
 	}
 	buffer=(Uint8 *)screen->pixels;
 	for ( i=0; i<screen->h; ++i ) {
@@ -344,15 +378,25 @@ int main(int argc, char *argv[])
 	SDL_UpdateRect(screen, 0, 0, 0, 0);
 
 	/* Create the light */
-	light = CreateLight(screen, 82);  
+	light = CreateLight(screen, 82);
 	if ( light == NULL ) {
-		exit(1);
-	}  
+		sprintf(text_buffer, "Couldn't Create light\n",
+							SDL_GetError());
+		SDL_LogCritical(SDL_LOG_CATEGORY_APPLICATION, text_buffer);
+		SDL_SetError(text_buffer);
+		for(;;);
+	}
 
 	/* Load the sprite */
-	if ( LoadSprite(screen, "icon.bmp") < 0 ) {
-		SDL_FreeSurface(light);  
-		exit(1);
+	if ( LoadSprite(screen, icon_image) < 0 ) {
+		SDL_FreeSurface(light);
+		sprintf(text_buffer, "%s l%d :Couldn't load %s\n",
+							__FUNCTION__,
+							__LINE__,
+							icon_image);
+		SDL_LogCritical(SDL_LOG_CATEGORY_APPLICATION, text_buffer);
+		SDL_SetError(text_buffer);
+		for(;;);
 	}
 
 	/* Set a clipping rectangle to clip the outside edge of the screen */
@@ -377,7 +421,7 @@ int main(int argc, char *argv[])
 			MoveSprite(screen, NULL);
 		}
 
-		/* Slow down the loop to 30 frames/second */ 
+		/* Slow down the loop to 30 frames/second */
 		ticks = SDL_GetTicks();
 		if ( (ticks-lastticks) < FRAME_TICKS ) {
 #ifdef CHECK_SLEEP_GRANULARITY
@@ -433,7 +477,7 @@ fprintf(stderr, "Slept %d ticks\n", (SDL_GetTicks()-ticks));
 
 	/* Print out some timing information */
 	if ( flashes > 0 ) {
-		printf("%d alpha blits, ~%4.4f ms per blit\n", 
+		printf("%d alpha blits, ~%4.4f ms per blit\n",
 			flashes, (float)flashtime/flashes);
 	}
 	return(0);

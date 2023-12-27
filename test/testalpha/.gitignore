@@ -1,0 +1,17 @@
+
+# Compiled Object files
+*.o
+
+# Compiled Dynamic libraries
+*.so
+
+# Compiled Static libraries
+#*.a
+*.lib
+
+# Executables
+*.bin
+/cmake-build-debug/
+/.idea/
+/bin/
+/CD/

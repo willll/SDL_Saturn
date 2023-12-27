@@ -27,14 +27,14 @@ static char rcsid =
 
 #ifndef DISABLE_FILE
 
-/* 
+/*
    Code to load and save surfaces in Windows BMP format.
 
    Why support BMP format?  Well, it's a native format for Windows, and
    most image processing programs can read and write it.  It would be nice
    to be able to have at least one image format that we can natively load
    and save, and since PNG is so complex that it would bloat the library,
-   BMP is a good alternative. 
+   BMP is a good alternative.
 
    This code currently supports Win32 DIBs in uncompressed 8 and 24 bpp.
 */
@@ -101,6 +101,10 @@ SDL_Surface * SDL_LoadBMP_RW (SDL_RWops *src, int freesrc)
 	SDL_ClearError();
 	if ( SDL_RWread(src, magic, 1, 2) != 2 ) {
 		SDL_Error(SDL_EFREAD);
+    SDL_LogCritical(SDL_LOG_CATEGORY_SYSTEM,
+                    "%s l%d : %s",
+                    __FUNCTION__,
+                    __LINE__, SDL_GetError());
 		was_error = 1;
 		goto done;
 	}
@@ -230,14 +234,14 @@ SDL_Surface * SDL_LoadBMP_RW (SDL_RWops *src, int freesrc)
 				SDL_RWread(src, &palette->colors[i].g, 1, 1);
 				SDL_RWread(src, &palette->colors[i].r, 1, 1);
 				palette->colors[i].unused = 0;
-			}	
+			}
 		} else {
 			for ( i = 0; i < (int)biClrUsed; ++i ) {
 				SDL_RWread(src, &palette->colors[i].b, 1, 1);
 				SDL_RWread(src, &palette->colors[i].g, 1, 1);
 				SDL_RWread(src, &palette->colors[i].r, 1, 1);
 				SDL_RWread(src, &palette->colors[i].unused, 1, 1);
-			}	
+			}
 		}
 		palette->ncolors = biClrUsed;
 	}

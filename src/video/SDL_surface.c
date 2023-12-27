@@ -39,6 +39,7 @@ static char rcsid =
 #include "SDL_pixels_c.h"
 #include "SDL_memops.h"
 #include "SDL_leaks.h"
+#include "SDL_log.h"
 
 /* Public routines */
 /*
@@ -81,6 +82,11 @@ SDL_Surface * SDL_CreateRGBSurface (Uint32 flags,
 	surface = (SDL_Surface *)malloc(sizeof(*surface));
 	if ( surface == NULL ) {
 		SDL_OutOfMemory();
+    SDL_LogCritical(SDL_LOG_CATEGORY_RENDER,
+                    "%s l%d : SDL_OutOfMemory (%d)\n",
+                    __FUNCTION__,
+                    __LINE__,
+                    sizeof(*surface) );
 		return(NULL);
 	}
 	surface->flags = SDL_SWSURFACE;
@@ -94,6 +100,7 @@ SDL_Surface * SDL_CreateRGBSurface (Uint32 flags,
 	surface->format = SDL_AllocFormat(depth, Rmask, Gmask, Bmask, Amask);
 	if ( surface->format == NULL ) {
 		free(surface);
+    SDL_LogCritical(SDL_LOG_CATEGORY_RENDER, "%s l%d : SDL_AllocFormat error\n", __FUNCTION__, __LINE__);
 		return(NULL);
 	}
 	if ( Amask ) {
@@ -119,6 +126,11 @@ SDL_Surface * SDL_CreateRGBSurface (Uint32 flags,
 			if ( surface->pixels == NULL ) {
 				SDL_FreeSurface(surface);
 				SDL_OutOfMemory();
+        SDL_LogCritical(SDL_LOG_CATEGORY_RENDER,
+                        "%s l%d : SDL_OutOfMemory (%d)\n",
+                         __FUNCTION__,
+                         __LINE__,
+                         surface->h*surface->pitch);
 				return(NULL);
 			}
 			/* This is important for bitmaps */
@@ -130,6 +142,7 @@ SDL_Surface * SDL_CreateRGBSurface (Uint32 flags,
 	surface->map = SDL_AllocBlitMap();
 	if ( surface->map == NULL ) {
 		SDL_FreeSurface(surface);
+    SDL_LogCritical(SDL_LOG_CATEGORY_RENDER, "%s l%d : SDL_AllocBlitMap error\n", __FUNCTION__, __LINE__);
 		return(NULL);
 	}
 
