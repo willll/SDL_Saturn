@@ -94,6 +94,10 @@ SDL_Surface * SDL_LoadBMP_RW (SDL_RWops *src, int freesrc)
 	was_error = 0;
 	if ( src == NULL ) {
 		was_error = 1;
+    SDL_LogCritical(SDL_LOG_CATEGORY_SYSTEM,
+                    "%s l%d : Invalid data source\n",
+                    __FUNCTION__,
+                    __LINE__);
 		goto done;
 	}
 
@@ -102,8 +106,8 @@ SDL_Surface * SDL_LoadBMP_RW (SDL_RWops *src, int freesrc)
 	SDL_ClearError();
 	if ( SDL_RWread(src, magic, 1, 2) != 2 ) {
 		SDL_Error(SDL_EFREAD);
-    SDL_LogCritical(SDL_LOG_CATEGORY_SYSTEM,
-                    "%s l%d : %s",
+    SDL_LogError(SDL_LOG_CATEGORY_SYSTEM,
+                    "%s l%d : %s\n",
                     __FUNCTION__,
                     __LINE__, SDL_GetError());
 		was_error = 1;
@@ -111,6 +115,11 @@ SDL_Surface * SDL_LoadBMP_RW (SDL_RWops *src, int freesrc)
 	}
 	if ( strncmp(magic, "BM", 2) != 0 ) {
 		SDL_SetError("File is not a Windows BMP file");
+    SDL_LogError(SDL_LOG_CATEGORY_SYSTEM,
+                    "%s l%d : %s\n",
+                    __FUNCTION__,
+                    __LINE__,
+                  SDL_GetError());
 		was_error = 1;
 		goto done;
 	}
@@ -148,6 +157,10 @@ SDL_Surface * SDL_LoadBMP_RW (SDL_RWops *src, int freesrc)
 	/* Check for read error */
 	if ( strcmp(SDL_GetError(), "") != 0 ) {
 		was_error = 1;
+    SDL_LogError(SDL_LOG_CATEGORY_SYSTEM,
+                    "%s l%d : Read error\n",
+                    __FUNCTION__,
+                    __LINE__);
 		goto done;
 	}
 
@@ -211,6 +224,11 @@ SDL_Surface * SDL_LoadBMP_RW (SDL_RWops *src, int freesrc)
 			break;
 		default:
 			SDL_SetError("Compressed BMP files not supported");
+      SDL_LogError(SDL_LOG_CATEGORY_SYSTEM,
+                      "%s l%d : %s\n",
+                      __FUNCTION__,
+                      __LINE__,
+                      SDL_GetError());
 			was_error = 1;
 			goto done;
 	}
@@ -220,6 +238,10 @@ SDL_Surface * SDL_LoadBMP_RW (SDL_RWops *src, int freesrc)
 			biWidth, biHeight, biBitCount, Rmask, Gmask, Bmask, 0);
 	if ( surface == NULL ) {
 		was_error = 1;
+    SDL_LogError(SDL_LOG_CATEGORY_SYSTEM,
+                    "%s l%d : SDL_CreateRGBSurface failed\n",
+                    __FUNCTION__,
+                    __LINE__);
 		goto done;
 	}
 
@@ -251,6 +273,11 @@ SDL_Surface * SDL_LoadBMP_RW (SDL_RWops *src, int freesrc)
 	if ( SDL_RWseek(src, fp_offset+bfOffBits, SEEK_SET) < 0 ) {
 		SDL_Error(SDL_EFSEEK);
 		was_error = 1;
+    SDL_LogError(SDL_LOG_CATEGORY_SYSTEM,
+                        "%s l%d : %s\n",
+                        __FUNCTION__,
+                        __LINE__,
+                        SDL_GetError() );
 		goto done;
 	}
 	bits = (Uint8 *)surface->pixels+(surface->h*surface->pitch);
@@ -278,8 +305,12 @@ SDL_Surface * SDL_LoadBMP_RW (SDL_RWops *src, int freesrc)
 			for ( i=0; i<surface->w; ++i ) {
 				if ( i%(8/ExpandBMP) == 0 ) {
 					if ( !SDL_RWread(src, &pixel, 1, 1) ) {
-						SDL_SetError(
-					"Error reading from BMP");
+						SDL_SetError("Error reading from BMP");
+          SDL_LogError(SDL_LOG_CATEGORY_SYSTEM,
+                              "%s l%d : %s\n",
+                              __FUNCTION__,
+                              __LINE__,
+                              SDL_GetError());
 						was_error = 1;
 						goto done;
 					}
@@ -293,6 +324,11 @@ SDL_Surface * SDL_LoadBMP_RW (SDL_RWops *src, int freesrc)
 			if ( SDL_RWread(src, bits, 1, surface->pitch)
 							 != surface->pitch ) {
 				SDL_Error(SDL_EFREAD);
+        SDL_LogError(SDL_LOG_CATEGORY_SYSTEM,
+                            "%s l%d : %s\n",
+                            __FUNCTION__,
+                            __LINE__,
+                            SDL_GetError() );
 				was_error = 1;
 				goto done;
 			}

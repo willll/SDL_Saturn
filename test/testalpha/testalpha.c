@@ -378,6 +378,7 @@ int main(int argc, char *argv[])
 	SDL_UpdateRect(screen, 0, 0, 0, 0);
 
 	/* Create the light */
+	SDL_LogVerbose(SDL_LOG_CATEGORY_APPLICATION, "Create the light\n");
 	light = CreateLight(screen, 82);
 	if ( light == NULL ) {
 		sprintf(text_buffer, "Couldn't Create light\n",
@@ -388,6 +389,7 @@ int main(int argc, char *argv[])
 	}
 
 	/* Load the sprite */
+	SDL_LogVerbose(SDL_LOG_CATEGORY_APPLICATION, "Load the sprite\n");
 	if ( LoadSprite(screen, icon_image) < 0 ) {
 		SDL_FreeSurface(light);
 		sprintf(text_buffer, "%s l%d :Couldn't load %s\n",
@@ -400,6 +402,7 @@ int main(int argc, char *argv[])
 	}
 
 	/* Set a clipping rectangle to clip the outside edge of the screen */
+	SDL_LogVerbose(SDL_LOG_CATEGORY_APPLICATION, "Set a clipping rectangle to clip the outside edge of the screen\n");
 	{ SDL_Rect clip;
 		clip.x = 32;
 		clip.y = 32;
@@ -409,6 +412,7 @@ int main(int argc, char *argv[])
 	}
 
 	/* Wait for a keystroke */
+	SDL_LogVerbose(SDL_LOG_CATEGORY_APPLICATION, "Wait for a keystroke\n");
 	lastticks = SDL_GetTicks();
 	done = 0;
 	mouse_pressed = 0;
@@ -423,6 +427,7 @@ int main(int argc, char *argv[])
 
 		/* Slow down the loop to 30 frames/second */
 		ticks = SDL_GetTicks();
+		//SDL_LogVerbose(SDL_LOG_CATEGORY_APPLICATION, "Slow down the loop to 30 frames/second\n");
 		if ( (ticks-lastticks) < FRAME_TICKS ) {
 #ifdef CHECK_SLEEP_GRANULARITY
 fprintf(stderr, "Sleeping %d ticks\n", FRAME_TICKS-(ticks-lastticks));
@@ -435,6 +440,7 @@ fprintf(stderr, "Slept %d ticks\n", (SDL_GetTicks()-ticks));
 		lastticks = ticks;
 
 		/* Check for events */
+		//SDL_LogVerbose(SDL_LOG_CATEGORY_APPLICATION, "Check for events\n");
 		while ( SDL_PollEvent(&event) ) {
 			switch (event.type) {
 				/* Attract sprite while mouse is held down */
@@ -476,8 +482,9 @@ fprintf(stderr, "Slept %d ticks\n", (SDL_GetTicks()-ticks));
 	SDL_FreeSurface(backing);
 
 	/* Print out some timing information */
+	SDL_LogVerbose(SDL_LOG_CATEGORY_APPLICATION, "Print out some timing information\n");
 	if ( flashes > 0 ) {
-		printf("%d alpha blits, ~%4.4f ms per blit\n",
+		SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "%d alpha blits, ~%4.4f ms per blit\n",
 			flashes, (float)flashtime/flashes);
 	}
 	return(0);
