@@ -29,7 +29,6 @@ extern "C" {
 #include <sega_gfs.h>
 #include <sega_tim.h>
 #include <sega_mem.h>
-//#include	<per_x.h>
 
 #define		NBG1_MAP_ADR		(VDP2_VRAM_B1 + 0x18000 )
 #define   BACK_COL_ADR    (VDP2_VRAM_A1 + 0x1fffe)
@@ -42,8 +41,6 @@ extern "C" {
 #define	  SZ_HEAP	        0x10000
 static    unsigned long	  __heap[SZ_HEAP];
 
-//static    SysPort	*__port = NULL;
-
 #define malloc(X) MEM_Malloc(X)
 #define free(X) MEM_Free(X)
 
@@ -51,6 +48,8 @@ static    unsigned long	  __heap[SZ_HEAP];
 #define SDL_free(X) MEM_Free(X)
 #define SDL_vsnprintf vsnprintf
 #define SDL_size_add_overflow(X,Y,Z)  0
+//#define FILE GFS_FILE
+
 
 void _init_saturn(void);
 

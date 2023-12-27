@@ -50,6 +50,7 @@ set( SOURCES
   src/cdrom/SDL_cdrom.c
   src/cdrom/saturn/SDL_syscdrom.c
   src/file/SDL_rwops.c
+  src/file/saturn/gfs_wrap.c
   src/video/SDL_surface.c
   src/video/SDL_cursor.c
   src/video/SDL_video.c
@@ -118,6 +119,7 @@ target_include_directories(
     src/video
     src/cdrom
     src/joystick
+    src/file
     include
     ${SEGALIB}/include
     ${SEGASGL}/include

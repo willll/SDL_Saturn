@@ -6,7 +6,9 @@
 #include	<sega_mem.h>
 #include	<sgl.h>
 
-#ifndef ACTION_REPLAY
+#include "file/saturn/gfs_wrap.h"
+
+#ifndef DISABLE_FILE
   GfsDirName dir_name[MAX_DIR];
 #endif
 
@@ -22,5 +24,7 @@ static void	_intr_v_blank_out( void ){
 
 void _init_saturn(void) {
   MEM_Init( ( Uint32 )__heap, sizeof( __heap ));
-  //slInitSystem();
+  #ifndef DISABLE_FILE
+    init_GFS();
+  #endif
 }

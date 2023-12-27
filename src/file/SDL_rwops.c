@@ -35,8 +35,9 @@ static char rcsid =
 
 #include "SDL_saturn.h"
 #include "SDL_error.h"
+#include "SDL_log.h"
 #include "SDL_rwops.h"
-
+#include "saturn/gfs_wrap.h"
 /* Functions to read/write stdio file pointers */
 
 
@@ -44,9 +45,21 @@ static char rcsid =
 SDL_RWops *SDL_RWFromFile(const char *file, const char *mode)
 {
 	FILE *fp;
-	SDL_RWops *rwops;
+	SDL_RWops *rwops = NULL;
 
-	rwops = NULL;
+  fp = sat_fopen(file);
+
+  if (fp) {
+    rwops = (SDL_RWops *)malloc(sizeof(SDL_RWops));
+    if(rwops) {
+        rwops->hidden.stdio.fp = fp;
+        rwops->hidden.stdio.autoclose = 0;
+        rwops->seek = sat_seek;
+        rwops->read = sat_read;
+        rwops->write = sat_write;
+        rwops->close = sat_close;
+    }
+  }
 
 	return(rwops);
 }
