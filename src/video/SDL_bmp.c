@@ -224,7 +224,7 @@ SDL_Surface * SDL_LoadBMP_RW (SDL_RWops *src, int freesrc)
 			break;
 		default:
 			SDL_SetError("Compressed BMP files not supported");
-      SDL_LogError(SDL_LOG_CATEGORY_SYSTEM,
+      SDL_LogError(SDL_LOG_CATEGORY_VIDEO,
                       "%s l%d : %s\n",
                       __FUNCTION__,
                       __LINE__,
@@ -235,17 +235,38 @@ SDL_Surface * SDL_LoadBMP_RW (SDL_RWops *src, int freesrc)
 
 	/* Create a compatible surface, note that the colors are RGB ordered */
 	surface = SDL_CreateRGBSurface(SDL_SWSURFACE,
-			biWidth, biHeight, biBitCount, Rmask, Gmask, Bmask, 0);
+			                           biWidth,
+                                 biHeight,
+                                 biBitCount,
+                                 Rmask,
+                                 Gmask,
+                                 Bmask,
+                                 0);
 	if ( surface == NULL ) {
 		was_error = 1;
-    SDL_LogError(SDL_LOG_CATEGORY_SYSTEM,
+    SDL_LogError(SDL_LOG_CATEGORY_VIDEO,
                     "%s l%d : SDL_CreateRGBSurface failed\n",
                     __FUNCTION__,
                     __LINE__);
 		goto done;
-	}
+	} else {
+    SDL_LogVerbose(SDL_LOG_CATEGORY_VIDEO,
+                    "%s l%d : SDL_CreateRGBSurface succeed, biWidth(%d), biHeight(%d), biBitCount(%d), Rmask(%d), Gmask(%d), Bmask(%d)\n",
+                    __FUNCTION__,
+                    __LINE__,
+                    biWidth,
+                    biHeight,
+                    biBitCount,
+                    Rmask,
+                    Gmask,
+                    Bmask);
+  }
 
 	/* Load the palette, if any */
+  SDL_LogVerbose(SDL_LOG_CATEGORY_VIDEO,
+                  "%s l%d : Load the palette, if any\n",
+                  __FUNCTION__,
+                  __LINE__);
 	palette = (surface->format)->palette;
 	if ( palette ) {
 		if ( biClrUsed == 0 ) {
@@ -267,13 +288,27 @@ SDL_Surface * SDL_LoadBMP_RW (SDL_RWops *src, int freesrc)
 			}
 		}
 		palette->ncolors = biClrUsed;
-	}
+    SDL_LogVerbose(SDL_LOG_CATEGORY_VIDEO,
+                    "%s l%d : palette colors (%d)\n",
+                    __FUNCTION__,
+                    __LINE__,
+                    palette->ncolors);
+	} else {
+    SDL_LogVerbose(SDL_LOG_CATEGORY_VIDEO,
+                    "%s l%d : palette not found\n",
+                    __FUNCTION__,
+                    __LINE__);
+  }
 
 	/* Read the surface pixels.  Note that the bmp image is upside down */
+  SDL_LogVerbose(SDL_LOG_CATEGORY_VIDEO,
+                  "%s l%d : Read the surface pixels.  Note that the bmp image is upside down\n",
+                  __FUNCTION__,
+                  __LINE__);
 	if ( SDL_RWseek(src, fp_offset+bfOffBits, SEEK_SET) < 0 ) {
 		SDL_Error(SDL_EFSEEK);
 		was_error = 1;
-    SDL_LogError(SDL_LOG_CATEGORY_SYSTEM,
+    SDL_LogError(SDL_LOG_CATEGORY_VIDEO,
                         "%s l%d : %s\n",
                         __FUNCTION__,
                         __LINE__,
@@ -306,11 +341,11 @@ SDL_Surface * SDL_LoadBMP_RW (SDL_RWops *src, int freesrc)
 				if ( i%(8/ExpandBMP) == 0 ) {
 					if ( !SDL_RWread(src, &pixel, 1, 1) ) {
 						SDL_SetError("Error reading from BMP");
-          SDL_LogError(SDL_LOG_CATEGORY_SYSTEM,
-                              "%s l%d : %s\n",
-                              __FUNCTION__,
-                              __LINE__,
-                              SDL_GetError());
+            SDL_LogError(SDL_LOG_CATEGORY_VIDEO,
+                          "%s l%d : %s\n",
+                          __FUNCTION__,
+                          __LINE__,
+                          SDL_GetError());
 						was_error = 1;
 						goto done;
 					}
@@ -324,7 +359,7 @@ SDL_Surface * SDL_LoadBMP_RW (SDL_RWops *src, int freesrc)
 			if ( SDL_RWread(src, bits, 1, surface->pitch)
 							 != surface->pitch ) {
 				SDL_Error(SDL_EFREAD);
-        SDL_LogError(SDL_LOG_CATEGORY_SYSTEM,
+        SDL_LogError(SDL_LOG_CATEGORY_VIDEO,
                             "%s l%d : %s\n",
                             __FUNCTION__,
                             __LINE__,
@@ -338,7 +373,7 @@ SDL_Surface * SDL_LoadBMP_RW (SDL_RWops *src, int freesrc)
 			switch(biBitCount) {
 				case 15:
 				case 16: {
-				        Uint16 *pix = (Uint16 *)bits;
+	        Uint16 *pix = (Uint16 *)bits;
 					for(i = 0; i < surface->w; i++)
 					        pix[i] = SDL_Swap16(pix[i]);
 					break;
@@ -364,6 +399,10 @@ SDL_Surface * SDL_LoadBMP_RW (SDL_RWops *src, int freesrc)
 	}
 done:
 	if ( was_error ) {
+    SDL_LogError(SDL_LOG_CATEGORY_VIDEO,
+                        "%s l%d : Error while loading BMP\n",
+                        __FUNCTION__,
+                        __LINE__);
 		if ( surface ) {
 			SDL_FreeSurface(surface);
 		}
@@ -430,7 +469,7 @@ int SDL_SaveBMP_RW (SDL_Surface *saveme, SDL_RWops *dst, int freedst)
 
 			/* Convert to 24 bits per pixel */
 			surface = SDL_CreateRGBSurface(SDL_SWSURFACE,
-					saveme->w, saveme->h, 24,
+					                             saveme->w, saveme->h, 24,
 #if SDL_BYTEORDER == SDL_LIL_ENDIAN
 					0x00FF0000, 0x0000FF00, 0x000000FF,
 #else

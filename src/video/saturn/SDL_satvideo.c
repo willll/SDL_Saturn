@@ -71,6 +71,7 @@ static int SAT_FillRect (SDL_Surface *dst, SDL_Rect *dstrect, Uint32 color);
 /* SEGA Saturn driver bootstrap functions */
 inline static void Pal2CRAM( Uint16 *Pal_Data , void *Col_Adr , Uint32 suu );
 
+TEXTURE tex_spr[4];
 
 static int SAT_Available(void)
 {
@@ -305,7 +306,7 @@ SDL_Surface *SAT_SetVideoMode(_THIS, SDL_Surface *current,
     }
     SDL_LogVerbose(SDL_LOG_CATEGORY_VIDEO, "Init %d x %d x %d\n",  width, height, bpp);
 
-    slInitSystem(tv_mode, NULL, 1);
+    slInitSystem(tv_mode, (TEXTURE*)tex_spr, 1);
 
     slInitBitMap(bmNBG1, BM_512x256, (void *)VDP2_VRAM_A0);
     slBMPaletteNbg1(1);

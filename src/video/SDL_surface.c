@@ -100,7 +100,9 @@ SDL_Surface * SDL_CreateRGBSurface (Uint32 flags,
 	surface->format = SDL_AllocFormat(depth, Rmask, Gmask, Bmask, Amask);
 	if ( surface->format == NULL ) {
 		free(surface);
-    SDL_LogCritical(SDL_LOG_CATEGORY_RENDER, "%s l%d : SDL_AllocFormat error\n", __FUNCTION__, __LINE__);
+    SDL_LogError(SDL_LOG_CATEGORY_RENDER,
+                  "%s l%d : SDL_AllocFormat error\n",
+                   __FUNCTION__, __LINE__);
 		return(NULL);
 	}
 	if ( Amask ) {
@@ -142,7 +144,9 @@ SDL_Surface * SDL_CreateRGBSurface (Uint32 flags,
 	surface->map = SDL_AllocBlitMap();
 	if ( surface->map == NULL ) {
 		SDL_FreeSurface(surface);
-    SDL_LogCritical(SDL_LOG_CATEGORY_RENDER, "%s l%d : SDL_AllocBlitMap error\n", __FUNCTION__, __LINE__);
+    SDL_LogCritical(SDL_LOG_CATEGORY_RENDER,
+                    "%s l%d : SDL_AllocBlitMap error\n",
+                     __FUNCTION__, __LINE__);
 		return(NULL);
 	}
 
@@ -294,6 +298,9 @@ int SDL_SetAlphaChannel(SDL_Surface *surface, Uint8 value)
 	if ( (surface->format->Amask != 0xFF000000) &&
 	     (surface->format->Amask != 0x000000FF) ) {
 		SDL_SetError("Unsupported surface alpha mask format");
+    SDL_LogError(SDL_LOG_CATEGORY_RENDER,
+                  "%s l%d : %s\n",
+                   __FUNCTION__, __LINE__, SDL_GetError());
 		return -1;
 	}
 
@@ -376,6 +383,9 @@ SDL_bool SDL_SetClipRect(SDL_Surface *surface, const SDL_Rect *rect)
 
 	/* Don't do anything if there's no surface to act on */
 	if ( ! surface ) {
+    SDL_LogError(SDL_LOG_CATEGORY_RENDER,
+                  "%s l%d : Don't do anything if there's no surface to act on\n",
+                   __FUNCTION__, __LINE__);
 		return SDL_FALSE;
 	}
 
@@ -420,6 +430,9 @@ int SDL_LowerBlit (SDL_Surface *src, SDL_Rect *srcrect,
 	if ( (src->map->dst != dst) ||
              (src->map->dst->format_version != src->map->format_version) ) {
 		if ( SDL_MapSurface(src, dst) < 0 ) {
+      SDL_LogError(SDL_LOG_CATEGORY_RENDER,
+                    "%s l%d : blit mapping invalid\n",
+                     __FUNCTION__, __LINE__);
 			return(-1);
 		}
 	}
@@ -455,10 +468,16 @@ int SDL_UpperBlit (SDL_Surface *src, SDL_Rect *srcrect,
 	/* Make sure the surfaces aren't locked */
 	if ( ! src || ! dst ) {
 		SDL_SetError("SDL_UpperBlit: passed a NULL surface");
+    SDL_LogError(SDL_LOG_CATEGORY_RENDER,
+                  "%s l%d : %s\n",
+                   __FUNCTION__, __LINE__, SDL_GetError());
 		return(-1);
 	}
 	if ( src->locked || dst->locked ) {
 		SDL_SetError("Surfaces must not be locked during blit");
+    SDL_LogError(SDL_LOG_CATEGORY_RENDER,
+                  "%s l%d : %s\n",
+                   __FUNCTION__, __LINE__, SDL_GetError());
 		return(-1);
 	}
 
@@ -790,6 +809,11 @@ SDL_Surface * SDL_ConvertSurface (SDL_Surface *surface,
 		}
 		if ( i == format->palette->ncolors ) {
 			SDL_SetError("Empty destination palette");
+      SDL_LogError(SDL_LOG_CATEGORY_RENDER,
+                      "%s l%d : %s\n",
+                      __FUNCTION__,
+                      __LINE__,
+                      SDL_GetError());
 			return(NULL);
 		}
 	}
@@ -807,6 +831,11 @@ SDL_Surface * SDL_ConvertSurface (SDL_Surface *surface,
 				surface->w, surface->h, format->BitsPerPixel,
 		format->Rmask, format->Gmask, format->Bmask, format->Amask);
 	if ( convert == NULL ) {
+    SDL_LogError(SDL_LOG_CATEGORY_RENDER,
+                    "%s l%d : SDL_CreateRGBSurface error : %s\n",
+                    __FUNCTION__,
+                    __LINE__,
+                    SDL_GetError());
 		return(NULL);
 	}
 
@@ -858,7 +887,7 @@ SDL_Surface * SDL_ConvertSurface (SDL_Surface *surface,
 
 			SDL_GetRGB(colorkey,surface->format,&keyR,&keyG,&keyB);
 			SDL_SetColorKey(convert, cflags|(flags&SDL_RLEACCELOK),
-				SDL_MapRGB(convert->format, keyR, keyG, keyB));
+				              SDL_MapRGB(convert->format, keyR, keyG, keyB));
 		}
 		SDL_SetColorKey(surface, cflags, colorkey);
 	}
@@ -866,7 +895,7 @@ SDL_Surface * SDL_ConvertSurface (SDL_Surface *surface,
 		Uint32 aflags = surface_flags&(SDL_SRCALPHA|SDL_RLEACCELOK);
 		if ( convert != NULL ) {
 		        SDL_SetAlpha(convert, aflags|(flags&SDL_RLEACCELOK),
-				alpha);
+				                  alpha);
 		}
 		if ( format->Amask ) {
 			surface->flags |= SDL_SRCALPHA;

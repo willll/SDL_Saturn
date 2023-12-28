@@ -43,6 +43,7 @@ static char rcsid =
 #include "SDL_pixels_c.h"
 #include "../events/SDL_events_c.h"
 #include "SDL_cursor_c.h"
+#include "SDL_log.h"
 
 /* Available video drivers */
 static VideoBootStrap *bootstrap[] = {
@@ -88,6 +89,11 @@ int SDL_VideoInit (const char *driver_name, Uint32 flags)
 #elif defined(CANT_THREAD_EVENTS)
 	if ( (flags & SDL_INIT_EVENTTHREAD) == SDL_INIT_EVENTTHREAD ) {
 		SDL_SetError("OS doesn't support threaded events");
+    SDL_LogError(SDL_LOG_CATEGORY_VIDEO,
+                    "%s l%d : %s\n",
+                    __FUNCTION__,
+                    __LINE__,
+                    SDL_GetError());
 		return(-1);
 	}
 #endif
@@ -123,6 +129,11 @@ int SDL_VideoInit (const char *driver_name, Uint32 flags)
 
 	if ( video == NULL ) {
 		SDL_SetError("No available video device");
+    SDL_LogError(SDL_LOG_CATEGORY_VIDEO,
+                    "%s l%d : %s\n",
+                    __FUNCTION__,
+                    __LINE__,
+                    SDL_GetError());
 		return(-1);
 	}
 
@@ -339,10 +350,20 @@ static int SDL_GetVideoMode (int *w, int *h, int *BitsPerPixel, Uint32 flags)
 	/* Check parameters */
 	if ( *BitsPerPixel < 8 || *BitsPerPixel > 32 ) {
 		SDL_SetError("Invalid bits per pixel (range is {8...32})");
+    SDL_LogError(SDL_LOG_CATEGORY_VIDEO,
+                    "%s l%d : %s\n",
+                    __FUNCTION__,
+                    __LINE__,
+                    SDL_GetError());
 		return(0);
 	}
 	if ((*w <= 0) || (*h <= 0)) {
 		SDL_SetError("Invalid width or height");
+    SDL_LogError(SDL_LOG_CATEGORY_VIDEO,
+                    "%s l%d : %s\n",
+                    __FUNCTION__,
+                    __LINE__,
+                    SDL_GetError());
 		return(0);
 	}
 
@@ -396,6 +417,11 @@ static int SDL_GetVideoMode (int *w, int *h, int *BitsPerPixel, Uint32 flags)
 	}
 	if ( ! supported ) {
 		SDL_SetError("No video mode large enough for %dx%d", *w, *h);
+    SDL_LogError(SDL_LOG_CATEGORY_VIDEO,
+                    "%s l%d : %s\n",
+                    __FUNCTION__,
+                    __LINE__,
+                    SDL_GetError());
 	}
 	return(supported);
 }
@@ -773,6 +799,11 @@ SDL_Surface * SDL_DisplayFormat (SDL_Surface *surface)
 
 	if ( ! SDL_PublicSurface ) {
 		SDL_SetError("No video mode has been set");
+    SDL_LogError(SDL_LOG_CATEGORY_VIDEO,
+                    "%s l%d : %s\n",
+                    __FUNCTION__,
+                    __LINE__,
+                    SDL_GetError());
 		return(NULL);
 	}
 	/* Set the flags appropriate for copying to display surface */
@@ -807,6 +838,11 @@ SDL_Surface *SDL_DisplayFormatAlpha(SDL_Surface *surface)
 
 	if ( ! SDL_PublicSurface ) {
 		SDL_SetError("No video mode has been set");
+    SDL_LogError(SDL_LOG_CATEGORY_VIDEO,
+                    "%s l%d : %s\n",
+                    __FUNCTION__,
+                    __LINE__,
+                    SDL_GetError());
 		return(NULL);
 	}
 	vf = SDL_PublicSurface->format;
@@ -1243,11 +1279,21 @@ int SDL_GL_LoadLibrary(const char *path)
 	retval = -1;
 	if ( video == NULL ) {
 		SDL_SetError("Video subsystem has not been initialized");
+    SDL_LogError(SDL_LOG_CATEGORY_VIDEO,
+                    "%s l%d : %s\n",
+                    __FUNCTION__,
+                    __LINE__,
+                    SDL_GetError());
 	} else {
 		if ( video->GL_LoadLibrary ) {
 			retval = video->GL_LoadLibrary(this, path);
 		} else {
 			SDL_SetError("No dynamic GL support in video driver");
+      SDL_LogError(SDL_LOG_CATEGORY_VIDEO,
+                      "%s l%d : %s\n",
+                      __FUNCTION__,
+                      __LINE__,
+                      SDL_GetError());
 		}
 	}
 	return(retval);
@@ -1265,9 +1311,19 @@ void *SDL_GL_GetProcAddress(const char* proc)
 			func = video->GL_GetProcAddress(this, proc);
 		} else {
 			SDL_SetError("No GL driver has been loaded");
+      SDL_LogError(SDL_LOG_CATEGORY_VIDEO,
+                      "%s l%d : %s\n",
+                      __FUNCTION__,
+                      __LINE__,
+                      SDL_GetError());
 		}
 	} else {
 		SDL_SetError("No dynamic GL support in video driver");
+    SDL_LogError(SDL_LOG_CATEGORY_VIDEO,
+                    "%s l%d : %s\n",
+                    __FUNCTION__,
+                    __LINE__,
+                    SDL_GetError());
 	}
 	return func;
 }
@@ -1321,6 +1377,11 @@ int SDL_GL_SetAttribute( SDL_GLattr attr, int value )
 			break;
 		default:
 			SDL_SetError("Unknown OpenGL attribute");
+      SDL_LogError(SDL_LOG_CATEGORY_VIDEO,
+                      "%s l%d : %s\n",
+                      __FUNCTION__,
+                      __LINE__,
+                      SDL_GetError());
 			retval = -1;
 			break;
 	}
@@ -1339,6 +1400,11 @@ int SDL_GL_GetAttribute(SDL_GLattr attr, int* value)
 	} else {
 		*value = 0;
 		SDL_SetError("GL_GetAttribute not supported");
+    SDL_LogError(SDL_LOG_CATEGORY_VIDEO,
+                    "%s l%d : %s\n",
+                    __FUNCTION__,
+                    __LINE__,
+                    SDL_GetError());
 	}
 	return retval;
 }
@@ -1353,6 +1419,11 @@ void SDL_GL_SwapBuffers(void)
 		video->GL_SwapBuffers(this);
 	} else {
 		SDL_SetError("OpenGL video mode has not been set");
+    SDL_LogError(SDL_LOG_CATEGORY_VIDEO,
+                    "%s l%d : %s\n",
+                    __FUNCTION__,
+                    __LINE__,
+                    SDL_GetError());
 	}
 }
 

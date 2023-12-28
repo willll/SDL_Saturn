@@ -46,9 +46,9 @@ SDL_Surface *CreateLight(SDL_Surface *screen, int radius)
 	/* Create a 32 (8/8/8/8) bpp square with a full 8-bit alpha channel */
 	alphamask = 0x000000FF;
 	light = SDL_CreateRGBSurface(SDL_SWSURFACE, 2*radius, 2*radius, 32,
-			0xFF000000, 0x00FF0000, 0x0000FF00, alphamask);
+															0xFF000000, 0x00FF0000, 0x0000FF00, alphamask);
 	if ( light == NULL ) {
-		sprintf(text_buffer, "Couldn't Create light\n",
+		sprintf(text_buffer, "Couldn't Create light : %s\n",
 							SDL_GetError());
 		SDL_LogCritical(SDL_LOG_CATEGORY_APPLICATION, text_buffer);
 		SDL_SetError(text_buffer);
@@ -143,7 +143,7 @@ static SDL_Rect    position;
 static int         x_vel, y_vel;
 static int	   alpha_vel;
 
-int LoadSprite(SDL_Surface *screen, char *file)
+int LoadSprite(SDL_Surface *screen, const char *file)
 {
 	SDL_Surface *converted;
 
@@ -154,12 +154,22 @@ int LoadSprite(SDL_Surface *screen, char *file)
 			 							"Couldn't load %s: %s",
 										file, SDL_GetError());
 		return(-1);
+	} else {
+		SDL_LogVerbose(SDL_LOG_CATEGORY_APPLICATION,
+			 							"Sprite address : %p\n",
+										sprite);
+		SDL_LogVerbose(SDL_LOG_CATEGORY_APPLICATION,
+			 							"Sprite width (%d), height (%d), Pitch (%d), Offset (%d)\n",
+										sprite->w,
+										sprite->h,
+										sprite->pitch,
+										sprite->offset);
 	}
 
 	/* Set transparent pixel as the pixel at (0,0) */
 	if ( sprite->format->palette ) {
 		SDL_SetColorKey(sprite, SDL_SRCCOLORKEY,
-						*(Uint8 *)sprite->pixels);
+										*(Uint8 *)sprite->pixels);
 	}
 
 	/* Convert sprite to video format */
@@ -173,11 +183,22 @@ int LoadSprite(SDL_Surface *screen, char *file)
 	}
 	sprite = converted;
 
+	SDL_LogVerbose(SDL_LOG_CATEGORY_APPLICATION,
+									"Sprite converted address : %p\n",
+									sprite);
+	SDL_LogVerbose(SDL_LOG_CATEGORY_APPLICATION,
+									"Sprite converted width (%d), height (%d), Pitch (%d), Offset (%d)\n",
+									sprite->w,
+									sprite->h,
+									sprite->pitch,
+									sprite->offset);
 	/* Create the background */
+	SDL_LogVerbose(SDL_LOG_CATEGORY_APPLICATION,
+									"Create the background\n");
 	backing = SDL_CreateRGBSurface(SDL_SWSURFACE, sprite->w, sprite->h, 8,
-								0, 0, 0, 0);
+																	0, 0, 0, 0);
 	if ( backing == NULL ) {
-			SDL_LogCritical(SDL_LOG_CATEGORY_APPLICATION,
+		SDL_LogCritical(SDL_LOG_CATEGORY_APPLICATION,
 											"Couldn't create background: %s\n",
 											SDL_GetError());
 		SDL_FreeSurface(sprite);
@@ -185,6 +206,8 @@ int LoadSprite(SDL_Surface *screen, char *file)
 	}
 
 	/* Convert background to video format */
+	SDL_LogVerbose(SDL_LOG_CATEGORY_APPLICATION,
+									"Convert background to video format\n");
 	converted = SDL_DisplayFormat(backing);
 	SDL_FreeSurface(backing);
 	if ( converted == NULL ) {
@@ -289,7 +312,7 @@ void WarpSprite(SDL_Surface *screen, int x, int y)
 	SDL_UpdateRects(screen, 2, updates);
 }
 
-int main(int argc, char *argv[])
+int main(/*int argc, char *argv[]*/)
 {
 	const SDL_VideoInfo *info;
 	SDL_Surface *screen;
@@ -323,33 +346,12 @@ int main(int argc, char *argv[])
 	if ( info->vfmt->BitsPerPixel > 8 ) {
 		video_bpp = info->vfmt->BitsPerPixel;
 	} else {
-		video_bpp = COLOR_DEPTH;
+		video_bpp = COLOR_DEPTH; //8
 	}
 	videoflags = (SDL_HWSURFACE | SDL_FULLSCREEN);
-	// while ( argc > 1 ) {
-	// 	--argc;
-	// 	if ( strcmp(argv[argc-1], "-bpp") == 0 ) {
-	// 		video_bpp = atoi(argv[argc]);
-	// 		--argc;
-	// 	} else
-	// 	if ( strcmp(argv[argc], "-hw") == 0 ) {
-	// 		videoflags |= SDL_HWSURFACE;
-	// 	} else
-	// 	if ( strcmp(argv[argc], "-warp") == 0 ) {
-	// 		videoflags |= SDL_HWPALETTE;
-	// 	} else
-	// 	if ( strcmp(argv[argc], "-fullscreen") == 0 ) {
-	// 		videoflags |= SDL_FULLSCREEN;
-	// 	} else {
-	// 		fprintf(stderr,
-	// 		"Usage: %s [-bpp N] [-warp] [-hw] [-fullscreen]\n",
-	// 							argv[0]);
-	// 		exit(1);
-	// 	}
-	// }
 
 	/* Set 640x480 video mode */
-	if ( (screen=SDL_SetVideoMode(SCREEN_WIDTH,
+	if ( (screen = SDL_SetVideoMode(SCREEN_WIDTH,
 																SCREEN_HEIGHT,
 																video_bpp,
 																videoflags)) == NULL ) {
@@ -363,12 +365,14 @@ int main(int argc, char *argv[])
 
 	/* Set the surface pixels and refresh! */
 	if ( SDL_LockSurface(screen) < 0 ) {
-		sprintf(text_buffer, "Couldn't lock the display surface: %s\n",
+		sprintf(text_buffer,
+						"Couldn't lock the display surface: %s\n",
 							SDL_GetError());
 		SDL_LogCritical(SDL_LOG_CATEGORY_APPLICATION, text_buffer);
 		SDL_SetError(text_buffer);
 		for(;;);
 	}
+
 	buffer=(Uint8 *)screen->pixels;
 	for ( i=0; i<screen->h; ++i ) {
 		memset(buffer,(i*255)/screen->h, screen->pitch);
@@ -381,7 +385,7 @@ int main(int argc, char *argv[])
 	SDL_LogVerbose(SDL_LOG_CATEGORY_APPLICATION, "Create the light\n");
 	light = CreateLight(screen, 82);
 	if ( light == NULL ) {
-		sprintf(text_buffer, "Couldn't Create light\n",
+		sprintf(text_buffer, "Couldn't Create light : %s\n",
 							SDL_GetError());
 		SDL_LogCritical(SDL_LOG_CATEGORY_APPLICATION, text_buffer);
 		SDL_SetError(text_buffer);
@@ -402,7 +406,8 @@ int main(int argc, char *argv[])
 	}
 
 	/* Set a clipping rectangle to clip the outside edge of the screen */
-	SDL_LogVerbose(SDL_LOG_CATEGORY_APPLICATION, "Set a clipping rectangle to clip the outside edge of the screen\n");
+	SDL_LogVerbose(SDL_LOG_CATEGORY_APPLICATION,
+		 						"Set a clipping rectangle to clip the outside edge of the screen\n");
 	{ SDL_Rect clip;
 		clip.x = 32;
 		clip.y = 32;
@@ -447,7 +452,7 @@ fprintf(stderr, "Slept %d ticks\n", (SDL_GetTicks()-ticks));
 				case SDL_MOUSEMOTION:
 					if (event.motion.state != 0) {
 						AttractSprite(event.motion.x,
-								event.motion.y);
+													event.motion.y);
 						mouse_pressed = 1;
 					}
 					break;
