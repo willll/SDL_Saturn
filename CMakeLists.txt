@@ -40,7 +40,6 @@ set( c_flags
          )
 
 set( SOURCES
-
   src/SDL.c
   src/SDL_error.c
   src/SDL_fatal.c

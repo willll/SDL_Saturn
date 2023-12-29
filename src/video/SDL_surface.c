@@ -126,13 +126,13 @@ SDL_Surface * SDL_CreateRGBSurface (Uint32 flags,
 		if ( surface->w && surface->h ) {
 			surface->pixels = malloc(surface->h*surface->pitch);
 			if ( surface->pixels == NULL ) {
-				SDL_FreeSurface(surface);
-				SDL_OutOfMemory();
         SDL_LogCritical(SDL_LOG_CATEGORY_RENDER,
                         "%s l%d : SDL_OutOfMemory (%d)\n",
                          __FUNCTION__,
                          __LINE__,
                          surface->h*surface->pitch);
+         SDL_FreeSurface(surface);
+         SDL_OutOfMemory();
 				return(NULL);
 			}
 			/* This is important for bitmaps */
@@ -143,10 +143,11 @@ SDL_Surface * SDL_CreateRGBSurface (Uint32 flags,
 	/* Allocate an empty mapping */
 	surface->map = SDL_AllocBlitMap();
 	if ( surface->map == NULL ) {
-		SDL_FreeSurface(surface);
+
     SDL_LogCritical(SDL_LOG_CATEGORY_RENDER,
                     "%s l%d : SDL_AllocBlitMap error\n",
                      __FUNCTION__, __LINE__);
+ 		SDL_FreeSurface(surface);
 		return(NULL);
 	}
 
