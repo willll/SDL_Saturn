@@ -8,6 +8,11 @@
 
 #include "SDL.h"
 
+#define SCREEN_WIDTH	320
+#define SCREEN_HEIGHT	224
+#define COLOR_DEPTH		8
+
+
 /* Turn a normal gamma value into an appropriate gamma ramp */
 void CalculateGamma(double gamma, Uint16 *ramp)
 {
@@ -24,43 +29,12 @@ void CalculateGamma(double gamma, Uint16 *ramp)
 }
 
 /* This can be used as a general routine for all of the test programs */
-int get_video_args(char *argv[], int *w, int *h, int *bpp, Uint32 *flags)
+void get_video_args(int *w, int *h, int *bpp, Uint32 *flags)
 {
-	int i;
-
-	*w = 640;
-	*h = 480;
-	*bpp = 0;
-	*flags = SDL_SWSURFACE;
-
-	for ( i=1; argv[i]; ++i ) {
-		if ( strcmp(argv[i], "-width") == 0 ) {
-			if ( argv[i+1] ) {
-				*w = atoi(argv[++i]);
-			}
-		} else
-		if ( strcmp(argv[i], "-height") == 0 ) {
-			if ( argv[i+1] ) {
-				*h = atoi(argv[++i]);
-			}
-		} else
-		if ( strcmp(argv[i], "-bpp") == 0 ) {
-			if ( argv[i+1] ) {
-				*bpp = atoi(argv[++i]);
-			}
-		} else
-		if ( strcmp(argv[i], "-fullscreen") == 0 ) {
-			*flags |= SDL_FULLSCREEN;
-		} else
-		if ( strcmp(argv[i], "-hw") == 0 ) {
-			*flags |= SDL_HWSURFACE;
-		} else
-		if ( strcmp(argv[i], "-hwpalette") == 0 ) {
-			*flags |= SDL_HWPALETTE;
-		} else
-			break;
-	}
-	return i;
+	*w = SCREEN_WIDTH;
+	*h = SCREEN_HEIGHT;
+	*bpp = COLOR_DEPTH;
+	*flags = (SDL_HWSURFACE | SDL_FULLSCREEN);
 }
 
 int main(int argc, char *argv[])
@@ -76,21 +50,26 @@ int main(int argc, char *argv[])
 	Uint32 then, timeout;
 
 	/* Check command line arguments */
-	argv += get_video_args(argv, &w, &h, &bpp, &flags);
+	get_video_args(&w, &h, &bpp, &flags);
 
 	/* Initialize SDL */
 	if ( SDL_Init(SDL_INIT_VIDEO) < 0 ) {
-		fprintf(stderr,
-			"Couldn't initialize SDL: %s\n", SDL_GetError());
+		SDL_LogCritical(SDL_LOG_CATEGORY_APPLICATION,  "Couldn't initialize SDL: %s\n", SDL_GetError());
 		exit(1);
 	}
 	atexit(SDL_Quit);
 
+	SDL_LogSetPriority(SDL_LOG_CATEGORY_APPLICATION, SDL_LOG_PRIORITY_VERBOSE);
+	SDL_LogSetPriority(SDL_LOG_CATEGORY_SYSTEM, SDL_LOG_PRIORITY_VERBOSE);
+	SDL_LogSetPriority(SDL_LOG_CATEGORY_VIDEO, SDL_LOG_PRIORITY_VERBOSE);
+	SDL_LogSetPriority(SDL_LOG_CATEGORY_RENDER, SDL_LOG_PRIORITY_VERBOSE);
+
+
 	/* Initialize the display, always use hardware palette */
 	screen = SDL_SetVideoMode(w, h, bpp, flags | SDL_HWPALETTE);
 	if ( screen == NULL ) {
-		fprintf(stderr, "Couldn't set %dx%d video mode: %s\n",
-						w, h, SDL_GetError());
+		SDL_LogCritical(SDL_LOG_CATEGORY_APPLICATION, "Couldn't set %dx%d video mode: %s\n",
+																									w, h, SDL_GetError());
 		exit(1);
 	}
 
@@ -99,11 +78,12 @@ int main(int argc, char *argv[])
 
 	/* Set the desired gamma, if any */
 	gamma = 1.0f;
-	if ( *argv ) {
-		gamma = (float)atof(*argv);
-	}
+	// if ( *argv ) {
+	// 	gamma = (float)atof(*argv);
+	// }
+
 	if ( SDL_SetGamma(gamma, gamma, gamma) < 0 ) {
-		fprintf(stderr, "Unable to set gamma: %s\n", SDL_GetError());
+		SDL_LogCritical(SDL_LOG_CATEGORY_APPLICATION, "Unable to set gamma: %s\n", SDL_GetError());
 		exit(1);
 	}
 
@@ -111,9 +91,9 @@ int main(int argc, char *argv[])
 	/* See what gamma was actually set */
 	float real[3];
 	if ( SDL_GetGamma(&real[0], &real[1], &real[2]) < 0 ) {
-		printf("Couldn't get gamma: %s\n", SDL_GetError());
+		SDL_LogVerbose(SDL_LOG_CATEGORY_APPLICATION, "Couldn't get gamma: %s\n", SDL_GetError());
 	} else {
-		printf("Set gamma values: R=%2.2f, G=%2.2f, B=%2.2f\n",
+		SDL_LogVerbose(SDL_LOG_CATEGORY_APPLICATION, "Set gamma values: R=%2.2f, G=%2.2f, B=%2.2f\n",
 			real[0], real[1], real[2]);
 	}
 #endif

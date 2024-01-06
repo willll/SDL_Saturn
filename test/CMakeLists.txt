@@ -17,8 +17,11 @@ project( test VERSION 1.0 )
 #add_subdirectory( ${CMAKE_CURRENT_SOURCE_DIR}/testjoystick )
 #add_subdirectory( ${CMAKE_CURRENT_SOURCE_DIR}/testalpha )
 #add_subdirectory( ${CMAKE_CURRENT_SOURCE_DIR}/testpalette )
-#add_subdirectory( ${CMAKE_CURRENT_SOURCE_DIR}/testcdrom )
-add_subdirectory( ${CMAKE_CURRENT_SOURCE_DIR}/testbitmap )
+#add_subdirectory( ${CMAKE_CURRENT_SOURCE_DIR}/testcdrom )    # TODO
+#add_subdirectory( ${CMAKE_CURRENT_SOURCE_DIR}/testbitmap )
 #add_subdirectory( ${CMAKE_CURRENT_SOURCE_DIR}/testkeys )
 #add_subdirectory( ${CMAKE_CURRENT_SOURCE_DIR}/testwin )
-#add_subdirectory( ${CMAKE_CURRENT_SOURCE_DIR}/testerror )
+#add_subdirectory( ${CMAKE_CURRENT_SOURCE_DIR}/testerror )    # no threads
+add_subdirectory( ${CMAKE_CURRENT_SOURCE_DIR}/testgamma )
+#add_subdirectory( ${CMAKE_CURRENT_SOURCE_DIR}/testgl )       # no opengGL
+#add_subdirectory( ${CMAKE_CURRENT_SOURCE_DIR}/testlock )     # no threads

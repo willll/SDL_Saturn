@@ -50,6 +50,7 @@ set( SOURCES
   src/cdrom/saturn/SDL_syscdrom.c
   src/file/SDL_rwops.c
   src/file/saturn/gfs_wrap.c
+  src/video/SDL_gamma.c
   src/video/SDL_surface.c
   src/video/SDL_cursor.c
   src/video/SDL_video.c
