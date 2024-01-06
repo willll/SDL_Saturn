@@ -8,6 +8,10 @@
 #include "SDL.h"
 #include "picture.xbm"
 
+#define SCREEN_WIDTH	320
+#define SCREEN_HEIGHT	224
+#define COLOR_DEPTH		8
+
 SDL_Surface *LoadXBM(SDL_Surface *screen, int w, int h, Uint8 *bits)
 {
 	SDL_Surface *bitmap;
@@ -16,8 +20,7 @@ SDL_Surface *LoadXBM(SDL_Surface *screen, int w, int h, Uint8 *bits)
 	/* Allocate the bitmap */
 	bitmap = SDL_CreateRGBSurface(SDL_SWSURFACE, w, h, 1, 0, 0, 0, 0);
 	if ( bitmap == NULL ) {
-		fprintf(stderr, "Couldn't allocate bitmap: %s\n",
-						SDL_GetError());
+		SDL_LogCritical(SDL_LOG_CATEGORY_APPLICATION, "Couldn't allocate bitmap: %s\n",SDL_GetError());
 		return(NULL);
 	}
 
@@ -55,45 +58,28 @@ int main(int argc, char *argv[])
 
 	/* Initialize SDL */
 	if ( SDL_Init(SDL_INIT_VIDEO) < 0 ) {
-		fprintf(stderr, "Couldn't initialize SDL: %s\n",SDL_GetError());
+		SDL_LogCritical(SDL_LOG_CATEGORY_APPLICATION, "Couldn't initialize SDL: %s\n",SDL_GetError());
 		exit(1);
 	}
 	atexit(SDL_Quit);
 
-	video_bpp = 0;
-	videoflags = SDL_SWSURFACE;
-	while ( argc > 1 ) {
-		--argc;
-		if ( strcmp(argv[argc-1], "-bpp") == 0 ) {
-			video_bpp = atoi(argv[argc]);
-			--argc;
-		} else
-		if ( strcmp(argv[argc], "-warp") == 0 ) {
-			videoflags |= SDL_HWPALETTE;
-		} else
-		if ( strcmp(argv[argc], "-hw") == 0 ) {
-			videoflags |= SDL_HWSURFACE;
-		} else
-		if ( strcmp(argv[argc], "-fullscreen") == 0 ) {
-			videoflags |= SDL_FULLSCREEN;
-		} else {
-			fprintf(stderr,
-			"Usage: %s [-bpp N] [-warp] [-hw] [-fullscreen]\n",
-								argv[0]);
-			exit(1);
-		}
-	}
+	SDL_LogSetPriority(SDL_LOG_CATEGORY_APPLICATION, SDL_LOG_PRIORITY_VERBOSE);
+	SDL_LogSetPriority(SDL_LOG_CATEGORY_SYSTEM, SDL_LOG_PRIORITY_VERBOSE);
+	SDL_LogSetPriority(SDL_LOG_CATEGORY_VIDEO, SDL_LOG_PRIORITY_VERBOSE);
+	SDL_LogSetPriority(SDL_LOG_CATEGORY_RENDER, SDL_LOG_PRIORITY_VERBOSE);
 
-	/* Set 640x480 video mode */
-	if ( (screen=SDL_SetVideoMode(640,480,video_bpp,videoflags)) == NULL ) {
-		fprintf(stderr, "Couldn't set 640x480x%d video mode: %s\n",
-						video_bpp, SDL_GetError());
+	videoflags = (SDL_HWSURFACE | SDL_FULLSCREEN);
+
+	/* Set SCREEN_WIDTHXSCREEN_HEIGHT video mode */
+	if ( (screen=SDL_SetVideoMode(SCREEN_WIDTH, SCREEN_HEIGHT, COLOR_DEPTH, videoflags)) == NULL ) {
+		SDL_LogCritical(SDL_LOG_CATEGORY_APPLICATION, "Couldn't set %d x %d x %d video mode: %s\n",
+						SCREEN_WIDTH, SCREEN_HEIGHT, COLOR_DEPTH, SDL_GetError());
 		exit(2);
 	}
 
 	/* Set the surface pixels and refresh! */
 	if ( SDL_LockSurface(screen) < 0 ) {
-		fprintf(stderr, "Couldn't lock the display surface: %s\n",
+		SDL_LogCritical(SDL_LOG_CATEGORY_APPLICATION, "Couldn't lock the display surface: %s\n",
 							SDL_GetError());
 		exit(2);
 	}
@@ -109,6 +95,7 @@ int main(int argc, char *argv[])
 	bitmap = LoadXBM(screen, picture_width, picture_height,
 					(Uint8 *)picture_bits);
 	if ( bitmap == NULL ) {
+		SDL_LogCritical(SDL_LOG_CATEGORY_APPLICATION, "bitmap == NULL\n");
 		exit(1);
 	}
 
