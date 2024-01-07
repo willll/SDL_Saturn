@@ -9,8 +9,12 @@
 
 #include "SDL.h"
 
-#define NUM_SPRITES	100
+#define NUM_SPRITES	1 //100
 #define MAX_SPEED 	1
+
+#define SCREEN_WIDTH	320
+#define SCREEN_HEIGHT	224
+#define COLOR_DEPTH		8
 
 SDL_Surface *sprite;
 int numsprites;
@@ -21,12 +25,12 @@ int sprites_visible;
 
 int LoadSprite(SDL_Surface *screen, char *file)
 {
-	SDL_Surface *temp;
+	SDL_Surface *temp = NULL;
 
 	/* Load the sprite image */
 	sprite = SDL_LoadBMP(file);
 	if ( sprite == NULL ) {
-		fprintf(stderr, "Couldn't load %s: %s", file, SDL_GetError());
+		SDL_LogCritical(SDL_LOG_CATEGORY_APPLICATION, "Couldn't load %s: %s", file, SDL_GetError());
 		return(-1);
 	}
 
@@ -40,8 +44,9 @@ int LoadSprite(SDL_Surface *screen, char *file)
 	temp = SDL_DisplayFormat(sprite);
 	SDL_FreeSurface(sprite);
 	if ( temp == NULL ) {
-		fprintf(stderr, "Couldn't convert background: %s\n",
-							SDL_GetError());
+		SDL_LogCritical(SDL_LOG_CATEGORY_APPLICATION,
+			 							"Couldn't convert background: %s\n",
+										SDL_GetError());
 		return(-1);
 	}
 	sprite = temp;
@@ -94,7 +99,7 @@ void MoveSprites(SDL_Surface *screen, Uint32 background)
 /* This is a way of telling whether or not to use hardware surfaces */
 Uint32 FastestFlags(Uint32 flags)
 {
-	const SDL_VideoInfo *info;
+	const SDL_VideoInfo *info = NULL;
 
 	/* Hardware acceleration is only used in fullscreen mode */
 	flags |= SDL_FULLSCREEN;
@@ -138,58 +143,28 @@ int main(int argc, char *argv[])
 
 	/* Initialize SDL */
 	if ( SDL_Init(SDL_INIT_VIDEO) < 0 ) {
-		fprintf(stderr, "Couldn't initialize SDL: %s\n",SDL_GetError());
+		SDL_LogCritical(SDL_LOG_CATEGORY_APPLICATION, "Couldn't initialize SDL: %s\n",SDL_GetError());
 		exit(1);
 	}
 	atexit(SDL_Quit);
 
+	SDL_LogSetPriority(SDL_LOG_CATEGORY_APPLICATION, SDL_LOG_PRIORITY_VERBOSE);
+	SDL_LogSetPriority(SDL_LOG_CATEGORY_SYSTEM, SDL_LOG_PRIORITY_VERBOSE);
+	SDL_LogSetPriority(SDL_LOG_CATEGORY_VIDEO, SDL_LOG_PRIORITY_VERBOSE);
+	SDL_LogSetPriority(SDL_LOG_CATEGORY_RENDER, SDL_LOG_PRIORITY_VERBOSE);
+
 	numsprites = NUM_SPRITES;
-	videoflags = SDL_SWSURFACE|SDL_ANYFORMAT;
-	width = 640;
-	height = 480;
-	video_bpp = 8;
-	while ( argc > 1 ) {
-		--argc;
-		if ( strcmp(argv[argc-1], "-width") == 0 ) {
-			width = atoi(argv[argc]);
-			--argc;
-		} else
-		if ( strcmp(argv[argc-1], "-height") == 0 ) {
-			height = atoi(argv[argc]);
-			--argc;
-		} else
-		if ( strcmp(argv[argc-1], "-bpp") == 0 ) {
-			video_bpp = atoi(argv[argc]);
-			videoflags &= ~SDL_ANYFORMAT;
-			--argc;
-		} else
-		if ( strcmp(argv[argc], "-fast") == 0 ) {
-			videoflags = FastestFlags(videoflags);
-		} else
-		if ( strcmp(argv[argc], "-hw") == 0 ) {
-			videoflags ^= SDL_HWSURFACE;
-		} else
-		if ( strcmp(argv[argc], "-flip") == 0 ) {
-			videoflags ^= SDL_DOUBLEBUF;
-		} else
-		if ( strcmp(argv[argc], "-fullscreen") == 0 ) {
-			videoflags ^= SDL_FULLSCREEN;
-		} else
-		if ( isdigit(argv[argc][0]) ) {
-			numsprites = atoi(argv[argc]);
-		} else {
-			fprintf(stderr, 
-	"Usage: %s [-bpp N] [-hw] [-flip] [-fast] [-fullscreen] [numsprites]\n",
-								argv[0]);
-			exit(1);
-		}
-	}
+	videoflags =  (SDL_HWSURFACE | SDL_FULLSCREEN);
+	width = SCREEN_WIDTH;
+	height = SCREEN_HEIGHT;
+	video_bpp = COLOR_DEPTH;
 
 	/* Set video mode */
 	screen = SDL_SetVideoMode(width, height, video_bpp, videoflags);
 	if ( ! screen ) {
-		fprintf(stderr, "Couldn't set %dx%d video mode: %s\n",
-					width, height, SDL_GetError());
+		SDL_LogCritical(SDL_LOG_CATEGORY_APPLICATION,
+										"Couldn't set %dx%d video mode: %s\n",
+										width, height, SDL_GetError());
 		exit(2);
 	}
 
@@ -202,15 +177,20 @@ int main(int argc, char *argv[])
 	mem = (Uint8 *)malloc(4*sizeof(SDL_Rect)*numsprites);
 	if ( mem == NULL ) {
 		SDL_FreeSurface(sprite);
-		fprintf(stderr, "Out of memory!\n");
+		SDL_LogCritical(SDL_LOG_CATEGORY_APPLICATION, "Out of memory!\n");
 		exit(2);
+	} else {
+		SDL_LogVerbose(SDL_LOG_CATEGORY_APPLICATION,
+									"Sprite Memory allocated\n");
 	}
+
 	sprite_rects = (SDL_Rect *)mem;
 	positions = sprite_rects;
 	sprite_rects += numsprites;
 	velocities = sprite_rects;
 	sprite_rects += numsprites;
 	srand(time(NULL));
+
 	for ( i=0; i<numsprites; ++i ) {
 		positions[i].x = rand()%screen->w;
 		positions[i].y = rand()%screen->h;
@@ -226,20 +206,26 @@ int main(int argc, char *argv[])
 	background = SDL_MapRGB(screen->format, 0x00, 0x00, 0x00);
 
 	/* Print out information about our surfaces */
-	printf("Screen is at %d bits per pixel\n",screen->format->BitsPerPixel);
+	SDL_LogVerbose(SDL_LOG_CATEGORY_APPLICATION,
+								"Screen is at %d bits per pixel\n",
+								screen->format->BitsPerPixel);
+
 	if ( (screen->flags & SDL_HWSURFACE) == SDL_HWSURFACE ) {
-		printf("Screen is in video memory\n");
+		SDL_LogVerbose(SDL_LOG_CATEGORY_APPLICATION, "Screen is in video memory\n");
 	} else {
-		printf("Screen is in system memory\n");
+		SDL_LogVerbose(SDL_LOG_CATEGORY_APPLICATION, "Screen is in system memory\n");
 	}
+
 	if ( (screen->flags & SDL_DOUBLEBUF) == SDL_DOUBLEBUF ) {
-		printf("Screen has double-buffering enabled\n");
+		SDL_LogVerbose(SDL_LOG_CATEGORY_APPLICATION, "Screen has double-buffering enabled\n");
 	}
+
 	if ( (sprite->flags & SDL_HWSURFACE) == SDL_HWSURFACE ) {
-		printf("Sprite is in video memory\n");
+		SDL_LogVerbose(SDL_LOG_CATEGORY_APPLICATION, "Sprite is in video memory\n");
 	} else {
-		printf("Sprite is in system memory\n");
+		SDL_LogVerbose(SDL_LOG_CATEGORY_APPLICATION, "Sprite is in system memory\n");
 	}
+
 	/* Run a sample blit to trigger blit acceleration */
 	{ SDL_Rect dst;
 		dst.x = 0;
@@ -249,11 +235,13 @@ int main(int argc, char *argv[])
 		SDL_BlitSurface(sprite, NULL, screen, &dst);
 		SDL_FillRect(screen, &dst, background);
 	}
+
 	if ( (sprite->flags & SDL_HWACCEL) == SDL_HWACCEL ) {
-		printf("Sprite blit uses hardware acceleration\n");
+		SDL_LogVerbose(SDL_LOG_CATEGORY_APPLICATION, "Sprite blit uses hardware acceleration\n");
 	}
+
 	if ( (sprite->flags & SDL_RLEACCEL) == SDL_RLEACCEL ) {
-		printf("Sprite blit uses RLE acceleration\n");
+		SDL_LogVerbose(SDL_LOG_CATEGORY_APPLICATION, "Sprite blit uses RLE acceleration\n");
 	}
 
 	/* Loop, blitting sprites and waiting for a keystroke */
@@ -261,29 +249,29 @@ int main(int argc, char *argv[])
 	then = SDL_GetTicks();
 	done = 0;
 	sprites_visible = 0;
-	while ( !done ) {
-		/* Check for events */
-		++frames;
-		while ( SDL_PollEvent(&event) ) {
-			switch (event.type) {
-				case SDL_KEYDOWN:
-					/* Any keypress quits the app... */
-				case SDL_QUIT:
-					done = 1;
-					break;
-				default:
-					break;
-			}
-		}
-		MoveSprites(screen, background);
-	}
+	// while ( !done ) {
+	// 	/* Check for events */
+	// 	++frames;
+	// 	while ( SDL_PollEvent(&event) ) {
+	// 		switch (event.type) {
+	// 			case SDL_KEYDOWN:
+	// 				/* Any keypress quits the app... */
+	// 			case SDL_QUIT:
+	// 				done = 1;
+	// 				break;
+	// 			default:
+	// 				break;
+	// 		}
+	// 	}
+	// 	MoveSprites(screen, background);
+	// }
 	SDL_FreeSurface(sprite);
 	free(mem);
 
 	/* Print out some timing information */
 	now = SDL_GetTicks();
 	if ( now > then ) {
-		printf("%2.2f frames per second\n",
+		SDL_LogVerbose(SDL_LOG_CATEGORY_APPLICATION, "%2.2f frames per second\n",
 					((double)frames*1000)/(now-then));
 	}
 	return(0);
