@@ -38,6 +38,10 @@ void DrawBox(SDL_Surface *screen, int X, int Y)
 	area.y = Y-(area.h/2);
 	color = (rand()%NUM_COLORS);
 
+	SDL_LogVerbose(SDL_LOG_CATEGORY_APPLICATION,
+								"DrawBox area.w(%d) area.h(%d) area.x(%d) area.y(%d) color(%d)\n",
+								area.w,	area.h, 	area.x, 	area.y, color);
+
 	/* Do it! */
 	SDL_FillRect(screen, &area, color);
 	SDL_UpdateRects(screen, 1, &area);
@@ -76,11 +80,13 @@ SDL_Surface *CreateScreen(Uint16 w, Uint16 h, Uint8 bpp, Uint32 flags)
 										SDL_GetError());
 		return(NULL);
 	}
+
 	buffer = (Uint8 *)screen->pixels;
 	for ( i=0; i<screen->h; ++i ) {
 		memset(buffer,(i*(NUM_COLORS-1))/screen->h, screen->w);
 		buffer += screen->pitch;
 	}
+
 	SDL_UnlockSurface(screen);
 	SDL_UpdateRect(screen, 0, 0, 0, 0);
 
@@ -181,6 +187,9 @@ int main(int argc, char *argv[])
 			default:
 				break;
 		}
+
+		// Wait for vsync
+		slSynch();
 	}
 	SDL_Quit();
 	return(0);
