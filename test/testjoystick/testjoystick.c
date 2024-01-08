@@ -87,56 +87,56 @@ void WatchJoystick(SDL_Joystick *joystick, SDL_Surface *screen)
 			    default:
 				break;
 			}
-		}
-		/* Update visual joystick state */
-		for ( i=0; i<SDL_JoystickNumButtons(joystick); ++i ) {
-			SDL_Rect area;
+			/* Update visual joystick state */
+			for ( i=0; i<SDL_JoystickNumButtons(joystick); ++i ) {
+				SDL_Rect area;
 
-			area.x = i*34;
-			area.y = SCREEN_HEIGHT-34;
-			area.w = 32;
-			area.h = 32;
-			if (SDL_JoystickGetButton(joystick, i) == SDL_PRESSED) {
-				SDL_FillRect(screen, &area, 0xFFFF);
-			} else {
-				SDL_FillRect(screen, &area, 0x0000);
+				area.x = i*34;
+				area.y = SCREEN_HEIGHT-34;
+				area.w = 32;
+				area.h = 32;
+				if (SDL_JoystickGetButton(joystick, i) == SDL_PRESSED) {
+					SDL_FillRect(screen, &area, 0xFFFF);
+				} else {
+					SDL_FillRect(screen, &area, 0x0000);
+				}
+				SDL_UpdateRects(screen, 1, &area);
 			}
-			SDL_UpdateRects(screen, 1, &area);
+
+			/* Erase previous axes */
+			SDL_FillRect(screen, &axis_area[draw], 0x0000);
+
+			/* Draw the X/Y axis */
+			draw = !draw;
+			x = (((int)SDL_JoystickGetAxis(joystick, 0))+32768);
+			x *= SCREEN_WIDTH;
+			x /= 65535;
+			if ( x < 0 ) {
+				x = 0;
+			} else
+			if ( x > (SCREEN_WIDTH-16) ) {
+				x = SCREEN_WIDTH-16;
+			}
+			y = (((int)SDL_JoystickGetAxis(joystick, 1))+32768);
+			y *= SCREEN_HEIGHT;
+			y /= 65535;
+			if ( y < 0 ) {
+				y = 0;
+			} else
+			if ( y > (SCREEN_HEIGHT-16) ) {
+				y = SCREEN_HEIGHT-16;
+			}
+			axis_area[draw].x = (Sint16)x;
+			axis_area[draw].y = (Sint16)y;
+			axis_area[draw].w = 16;
+			axis_area[draw].h = 16;
+			SDL_FillRect(screen, &axis_area[draw], 0xFFFF);
+
+			SDL_UpdateRects(screen, 2, axis_area);
+
+			// Wait for vsync
+			slSynch();
 		}
-
-		/* Erase previous axes */
-		SDL_FillRect(screen, &axis_area[draw], 0x0000);
-
-		/* Draw the X/Y axis */
-		draw = !draw;
-		x = (((int)SDL_JoystickGetAxis(joystick, 0))+32768);
-		x *= SCREEN_WIDTH;
-		x /= 65535;
-		if ( x < 0 ) {
-			x = 0;
-		} else
-		if ( x > (SCREEN_WIDTH-16) ) {
-			x = SCREEN_WIDTH-16;
-		}
-		y = (((int)SDL_JoystickGetAxis(joystick, 1))+32768);
-		y *= SCREEN_HEIGHT;
-		y /= 65535;
-		if ( y < 0 ) {
-			y = 0;
-		} else
-		if ( y > (SCREEN_HEIGHT-16) ) {
-			y = SCREEN_HEIGHT-16;
-		}
-		axis_area[draw].x = (Sint16)x;
-		axis_area[draw].y = (Sint16)y;
-		axis_area[draw].w = 16;
-		axis_area[draw].h = 16;
-		SDL_FillRect(screen, &axis_area[draw], 0xFFFF);
-
-		SDL_UpdateRects(screen, 2, axis_area);
-
-		// Wait for vsync
-		slSynch();
 	}
 }
 
@@ -170,7 +170,6 @@ int main(int argc, char *argv[])
 		sprintf(text_buffer, "Couldn't set video mode: %s\n",SDL_GetError());
 		SDL_LogCritical(SDL_LOG_CATEGORY_APPLICATION, text_buffer);
 		SDL_SetError(text_buffer);
-		for(;;);
 	}
 
 	/* Print information about the joysticks */
@@ -187,7 +186,6 @@ int main(int argc, char *argv[])
 			sprintf(text_buffer, "Couldn't open joystick %d: %s\n", joystick_id, SDL_GetError());
 			SDL_LogCritical(SDL_LOG_CATEGORY_APPLICATION, text_buffer);
 			SDL_SetError(text_buffer);
- 			for(;;);
 	} else {
 		WatchJoystick(joystick, screen);
 		SDL_JoystickClose(joystick);

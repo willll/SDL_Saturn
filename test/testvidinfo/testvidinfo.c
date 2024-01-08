@@ -24,7 +24,7 @@ int main(int argc, char *argv[])
 
 	info = SDL_GetVideoInfo();
 	SDL_LogVerbose(SDL_LOG_CATEGORY_APPLICATION,
-								"Current display: %d bits-per-pixel\n",info->vfmt->BitsPerPixel);
+								"Current display: %d bits-per-pixel\n", info->vfmt->BitsPerPixel);
 
 	if ( info->vfmt->palette == NULL ) {
 		SDL_LogVerbose(SDL_LOG_CATEGORY_APPLICATION,
@@ -34,9 +34,10 @@ int main(int argc, char *argv[])
 		SDL_LogVerbose(SDL_LOG_CATEGORY_APPLICATION,
 									"	Blue Mask = 0x%.8x\n", info->vfmt->Bmask);
 	}
-	
+
 	/* Print available fullscreen video modes */
 	modes = SDL_ListModes(NULL, SDL_FULLSCREEN);
+	
 	if ( modes == (SDL_Rect **)0 ) {
 		SDL_LogVerbose(SDL_LOG_CATEGORY_APPLICATION,
 									"No available fullscreen video modes\n");

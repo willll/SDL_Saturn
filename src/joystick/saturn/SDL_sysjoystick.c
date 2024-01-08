@@ -321,7 +321,7 @@ void SDL_SYS_JoystickUpdate(SDL_Joystick *joystick)
     Sint16 data_changed = padd^prev_data;
     Sint16 push_changed = padp^prev_push;
 
-    if (data_changed) {
+    //if (data_changed) {
     //    if ((data_changed)&(PER_DGT_KU|PER_DGT_KD|PER_DGT_KL|PER_DGT_KR)) {
           Sint16 axis_0 = SDL_JoystickGetAxis(joystick, 0);
           Sint16 axis_1 = SDL_JoystickGetAxis(joystick, 1);;
@@ -347,8 +347,12 @@ void SDL_SYS_JoystickUpdate(SDL_Joystick *joystick)
             else
               axis_0 -= SDL_AXIS_STEP;
 
-          SDL_PrivateJoystickAxis(joystick, 0, axis_0);
-          SDL_PrivateJoystickAxis(joystick, 1, axis_1);
+          if (SDL_JoystickGetAxis(joystick, 0) != axis_0) {
+            SDL_PrivateJoystickAxis(joystick, 0, axis_0);
+          }
+          if (SDL_JoystickGetAxis(joystick, 1) != axis_1) {
+            SDL_PrivateJoystickAxis(joystick, 1, axis_1);
+          }
         //}
 
       	for(int i = 0; i < sizeof(sdl_buttons)/sizeof(sdl_buttons[0]); i++) {
@@ -356,7 +360,7 @@ void SDL_SYS_JoystickUpdate(SDL_Joystick *joystick)
       			SDL_PrivateJoystickButton(joystick, i, (padd & sdl_buttons[i])?SDL_PRESSED:SDL_RELEASED);
       		}
         }
-    }
+    //}
   }
 }
 

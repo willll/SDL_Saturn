@@ -14,7 +14,7 @@ project( test VERSION 1.0 )
 #add_subdirectory( ${CMAKE_CURRENT_SOURCE_DIR}/testver )
 #add_subdirectory( ${CMAKE_CURRENT_SOURCE_DIR}/testtypes )
 #add_subdirectory( ${CMAKE_CURRENT_SOURCE_DIR}/testtimer )
-#add_subdirectory( ${CMAKE_CURRENT_SOURCE_DIR}/testjoystick )
+add_subdirectory( ${CMAKE_CURRENT_SOURCE_DIR}/testjoystick )
 #add_subdirectory( ${CMAKE_CURRENT_SOURCE_DIR}/testalpha )
 #add_subdirectory( ${CMAKE_CURRENT_SOURCE_DIR}/testpalette )
 #add_subdirectory( ${CMAKE_CURRENT_SOURCE_DIR}/testcdrom )    # TODO
@@ -28,3 +28,4 @@ project( test VERSION 1.0 )
 #add_subdirectory( ${CMAKE_CURRENT_SOURCE_DIR}/testsem )      # no threads
 add_subdirectory( ${CMAKE_CURRENT_SOURCE_DIR}/testsprite )
 add_subdirectory( ${CMAKE_CURRENT_SOURCE_DIR}/testvidinfo )
+add_subdirectory( ${CMAKE_CURRENT_SOURCE_DIR}/graywin )
