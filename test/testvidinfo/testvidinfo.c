@@ -37,7 +37,7 @@ int main(int argc, char *argv[])
 
 	/* Print available fullscreen video modes */
 	modes = SDL_ListModes(NULL, SDL_FULLSCREEN);
-	
+
 	if ( modes == (SDL_Rect **)0 ) {
 		SDL_LogVerbose(SDL_LOG_CATEGORY_APPLICATION,
 									"No available fullscreen video modes\n");
@@ -100,6 +100,8 @@ int main(int argc, char *argv[])
 											"Color fills on hardware surfaces are accelerated\n");
 	}
 
+	for(;;);
+	
 	SDL_Quit();
 	return(0);
 }

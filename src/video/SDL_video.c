@@ -235,9 +235,8 @@ SDL_Surface *SDL_GetVideoSurface(void)
  */
 const SDL_VideoInfo *SDL_GetVideoInfo(void)
 {
-	const SDL_VideoInfo *info;
+	const SDL_VideoInfo *info = NULL;
 
-	info = NULL;
 	if ( current_video ) {
 		info = &current_video->info;
 	}

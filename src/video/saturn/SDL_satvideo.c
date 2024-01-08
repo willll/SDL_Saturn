@@ -73,6 +73,59 @@ inline static void Pal2CRAM( Uint16 *Pal_Data , void *Col_Adr , Uint32 suu );
 
 TEXTURE tex_spr[4];
 
+const static SDL_Rect
+        	RECT_320x224 = {0,0,320,224},
+        	RECT_320x240 = {0,0,320,240},
+          RECT_320x256 = {0,0,320,256},
+          RECT_320x448 = {0,0,320,448},
+          RECT_320x480 = {0,0,320,480},
+          RECT_320x512 = {0,0,320,512},
+          RECT_352x224 = {0,0,352,224},
+          RECT_352x240 = {0,0,352,240},
+          RECT_352x256 = {0,0,352,256},
+          RECT_352x448 = {0,0,352,448},
+          RECT_352x480 = {0,0,352,480},
+          RECT_352x512 = {0,0,352,512},
+          RECT_640x224 = {0,0,640,224},
+          RECT_640x240 = {0,0,640,240},
+          RECT_640x256 = {0,0,640,256},
+          RECT_640x448 = {0,0,640,448},
+          RECT_640x480 = {0,0,640,480},
+          RECT_640x512 = {0,0,640,512},
+          RECT_704x224 = {0,0,704,224},
+          RECT_704x240 = {0,0,704,240},
+          RECT_704x256 = {0,0,704,256},
+          RECT_704x448 = {0,0,704,448},
+          RECT_704x480 = {0,0,704,480},
+          RECT_704x512 = {0,0,704,512};
+
+const static SDL_Rect *vid_modes[] = {
+        	&RECT_320x224,
+        	&RECT_320x240,
+        	&RECT_320x256,
+          &RECT_320x448,
+          &RECT_320x480,
+          &RECT_320x512,
+          &RECT_352x224,
+          &RECT_352x256,
+          &RECT_352x448,
+          &RECT_352x480,
+          &RECT_352x512,
+          &RECT_640x224,
+          &RECT_640x240,
+          &RECT_640x256,
+          &RECT_640x448,
+          &RECT_640x480,
+          &RECT_640x512,
+          &RECT_704x224,
+          &RECT_704x240,
+          &RECT_704x256,
+          &RECT_704x448,
+          &RECT_704x480,
+          &RECT_704x512,
+        	NULL
+};
+
 static int SAT_Available(void)
 {
   const char *envr = getenv("SDL_VIDEODRIVER");
@@ -92,9 +145,9 @@ static void SAT_DeleteDevice(SDL_VideoDevice *device)
 static unsigned int get_hz()
 {
   if((TVSTAT & 1) == 0)
-  return 60;
+    return 60;
   else
-  return 50;
+    return 50;
 }
 
 static SDL_VideoDevice *SAT_CreateDevice(int devindex)
@@ -170,6 +223,17 @@ int SAT_VideoInit(_THIS, SDL_PixelFormat *vformat)
 
 SDL_Rect **SAT_ListModes(_THIS, SDL_PixelFormat *format, Uint32 flags)
 {
+  switch(format->BitsPerPixel) {
+	case 4:
+	case 8:
+  case 11:
+  case 15:
+  case 24:
+		return &vid_modes;
+	default:
+		return (SDL_Rect **) -1;
+	}
+
   return (SDL_Rect **) -1;
 }
 
