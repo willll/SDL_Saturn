@@ -36,7 +36,6 @@ int main()
 		sprintf(text_buffer, "Couldn't set video mode: %s\n",SDL_GetError());
 		SDL_LogCritical(SDL_LOG_CATEGORY_APPLICATION, text_buffer);
 		SDL_SetError(text_buffer);
-		for(;;);
 	}
 
 	for ( key=SDLK_FIRST; key<SDLK_LAST; ++key ) {
