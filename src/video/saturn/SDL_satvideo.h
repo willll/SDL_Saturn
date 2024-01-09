@@ -35,6 +35,7 @@ static char rcsid =
 /* Hidden "this" pointer for the video functions */
 #define _THIS	SDL_VideoDevice *this
 
+static const char* SAT_video_name = "SEGA SATURN";
 
 /* Private display data */
 

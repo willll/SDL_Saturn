@@ -8,9 +8,9 @@
 
 int main(int argc, char *argv[])
 {
-	const SDL_VideoInfo *info;
+	const SDL_VideoInfo *info = NULL;
 	int i;
-	SDL_Rect **modes;
+	SDL_Rect **modes = NULL;
 
 	if ( SDL_Init(SDL_INIT_VIDEO) < 0 ) {
 		SDL_LogCritical(SDL_LOG_CATEGORY_APPLICATION, "Couldn't initialize SDL: %s\n", SDL_GetError());
@@ -23,18 +23,27 @@ int main(int argc, char *argv[])
 	SDL_LogSetPriority(SDL_LOG_CATEGORY_RENDER, SDL_LOG_PRIORITY_VERBOSE);
 
 	info = SDL_GetVideoInfo();
-	SDL_LogVerbose(SDL_LOG_CATEGORY_APPLICATION,
-								"Current display: %d bits-per-pixel\n", info->vfmt->BitsPerPixel);
+	if (info) {
+		if (info->vfmt) {
+			SDL_LogVerbose(SDL_LOG_CATEGORY_APPLICATION,
+										"Current display: %d bits-per-pixel\n", info->vfmt->BitsPerPixel);
 
-	if ( info->vfmt->palette == NULL ) {
-		SDL_LogVerbose(SDL_LOG_CATEGORY_APPLICATION,
-									"	Red Mask = 0x%.8x\n", info->vfmt->Rmask);
-		SDL_LogVerbose(SDL_LOG_CATEGORY_APPLICATION,
-									"	Green Mask = 0x%.8x\n", info->vfmt->Gmask);
-		SDL_LogVerbose(SDL_LOG_CATEGORY_APPLICATION,
-									"	Blue Mask = 0x%.8x\n", info->vfmt->Bmask);
+			if ( info->vfmt->palette == NULL ) {
+				SDL_LogVerbose(SDL_LOG_CATEGORY_APPLICATION,
+											"	Red Mask = 0x%.8x\n", info->vfmt->Rmask);
+				SDL_LogVerbose(SDL_LOG_CATEGORY_APPLICATION,
+											"	Green Mask = 0x%.8x\n", info->vfmt->Gmask);
+				SDL_LogVerbose(SDL_LOG_CATEGORY_APPLICATION,
+											"	Blue Mask = 0x%.8x\n", info->vfmt->Bmask);
+										}
+		} else {
+			SDL_LogCritical(SDL_LOG_CATEGORY_APPLICATION,
+				 							"Current display: not set properly\n");
+		}
+	} else {
+		SDL_LogCritical(SDL_LOG_CATEGORY_APPLICATION,
+										"SDL_GetVideoInfo returned NULL ... not good\n");
 	}
-
 	/* Print available fullscreen video modes */
 	modes = SDL_ListModes(NULL, SDL_FULLSCREEN);
 
@@ -57,6 +66,9 @@ int main(int argc, char *argv[])
 	if ( info->wm_available ) {
 		SDL_LogVerbose(SDL_LOG_CATEGORY_APPLICATION,
 									"A window manager is available\n");
+	} else {
+		SDL_LogVerbose(SDL_LOG_CATEGORY_APPLICATION,
+									"A window manager is NOT available\n");
 	}
 
 	if ( info->hw_available ) {
@@ -101,7 +113,7 @@ int main(int argc, char *argv[])
 	}
 
 	for(;;);
-	
+
 	SDL_Quit();
 	return(0);
 }

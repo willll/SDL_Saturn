@@ -226,7 +226,13 @@ SDL_Surface *SDL_GetVideoSurface(void)
 	visible = NULL;
 	if ( current_video ) {
 		visible = current_video->visible;
-	}
+	} else {
+    SDL_LogError(SDL_LOG_CATEGORY_VIDEO,
+                    "%s l%d : current_video NOT set\n",
+                    __FUNCTION__,
+                    __LINE__);
+  }
+
 	return(visible);
 }
 
@@ -239,7 +245,12 @@ const SDL_VideoInfo *SDL_GetVideoInfo(void)
 
 	if ( current_video ) {
 		info = &current_video->info;
-	}
+	} else {
+    SDL_LogError(SDL_LOG_CATEGORY_VIDEO,
+                    "%s l%d : current_video NOT set\n",
+                    __FUNCTION__,
+                    __LINE__);
+  }
 	return(info);
 }
 
@@ -254,15 +265,19 @@ SDL_Rect ** SDL_ListModes (SDL_PixelFormat *format, Uint32 flags)
 {
 	SDL_VideoDevice *video = current_video;
 	SDL_VideoDevice *this  = current_video;
-	SDL_Rect **modes;
+	SDL_Rect **modes = NULL;
 
-	modes = NULL;
 	if ( SDL_VideoSurface ) {
 		if ( format == NULL ) {
 			format = SDL_VideoSurface->format;
 		}
 		modes = video->ListModes(this, format, flags);
-	}
+	} else {
+    SDL_LogError(SDL_LOG_CATEGORY_VIDEO,
+                    "%s l%d : SDL_VideoSurface NOT set\n",
+                    __FUNCTION__,
+                    __LINE__);
+  }
 	return(modes);
 }
 

@@ -156,18 +156,20 @@ static SDL_VideoDevice *SAT_CreateDevice(int devindex)
 
   /* Initialize all variables that we clean on shutdown */
   device = (SDL_VideoDevice *)malloc(sizeof(SDL_VideoDevice));
+
   if ( device ) {
     memset(device, 0, (sizeof *device));
     device->hidden = (struct SDL_PrivateVideoData *)malloc((sizeof *device->hidden));
   }
 
-  if ( (device == NULL) || (device->hidden == NULL) ) {
+  if ( (device == NULL) || (device->hidden == NULL)  ) {
     SDL_OutOfMemory();
     if ( device ) {
       free(device);
     }
     return(0);
   }
+
   memset(device->hidden, 0, (sizeof *device->hidden));
 
   /* Set the function pointers */
@@ -194,8 +196,23 @@ static SDL_VideoDevice *SAT_CreateDevice(int devindex)
   device->GetWMInfo = NULL;
   device->InitOSKeymap = SAT_InitOSKeymap;
   device->PumpEvents = SAT_PumpEvents;
-
   device->free = SAT_DeleteDevice;
+
+  /* set the attributes */
+  device->name = SAT_video_name;
+
+  device->info.hw_available = 1;  /* Flag: Can you create hardware surfaces? */
+  device->info.wm_available = 0;
+  device->info.blit_hw = 1;       /* Flag: Accelerated blits HW --> HW */
+  device->info.blit_hw_CC = 1;    /* Flag: Accelerated blits with Colorkey */
+  device->info.blit_hw_A = 1;     /* Flag: Accelerated blits with Alpha */
+  device->info.blit_sw = 0;       /* Flag: Accelerated blits SW --> HW */
+  device->info.blit_sw_CC = 0;    /* Flag: Accelerated blits with Colorkey */
+  device->info.blit_sw_A = 0;     /* Flag: Accelerated blits with Alpha */
+  device->info.blit_fill = 1;     /* Flag: Accelerated color fill */
+  device->info.video_mem = 1536;  /* The total amount of video memory (in K) */
+
+  device->info.vfmt = NULL;     	/* Value: The format of the video surface */
 
   return device;
 }
@@ -223,16 +240,22 @@ int SAT_VideoInit(_THIS, SDL_PixelFormat *vformat)
 
 SDL_Rect **SAT_ListModes(_THIS, SDL_PixelFormat *format, Uint32 flags)
 {
-  switch(format->BitsPerPixel) {
-	case 4:
-	case 8:
-  case 11:
-  case 15:
-  case 24:
-		return &vid_modes;
-	default:
-		return (SDL_Rect **) -1;
-	}
+  if (SDL_FULLSCREEN == flags ) {
+    if (format) {
+      switch(format->BitsPerPixel) {
+      	case 4:
+      	case 8:
+        case 11:
+        case 15:
+        case 24:
+      		return &vid_modes;
+      	default:
+      		return (SDL_Rect **) -1;
+    	}
+    } else {
+      return &vid_modes;
+    }
+  }
 
   return (SDL_Rect **) -1;
 }
