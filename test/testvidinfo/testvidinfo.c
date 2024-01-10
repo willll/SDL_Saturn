@@ -35,7 +35,7 @@ int main(int argc, char *argv[])
 											"	Green Mask = 0x%.8x\n", info->vfmt->Gmask);
 				SDL_LogVerbose(SDL_LOG_CATEGORY_APPLICATION,
 											"	Blue Mask = 0x%.8x\n", info->vfmt->Bmask);
-										}
+			}
 		} else {
 			SDL_LogCritical(SDL_LOG_CATEGORY_APPLICATION,
 				 							"Current display: not set properly\n");
@@ -44,6 +44,7 @@ int main(int argc, char *argv[])
 		SDL_LogCritical(SDL_LOG_CATEGORY_APPLICATION,
 										"SDL_GetVideoInfo returned NULL ... not good\n");
 	}
+
 	/* Print available fullscreen video modes */
 	modes = SDL_ListModes(NULL, SDL_FULLSCREEN);
 

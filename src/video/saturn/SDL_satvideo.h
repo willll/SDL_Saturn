@@ -35,7 +35,9 @@ static char rcsid =
 /* Hidden "this" pointer for the video functions */
 #define _THIS	SDL_VideoDevice *this
 
-static const char* SAT_video_name = "SEGA SATURN";
+#define SATURNVID_DRIVER_NAME "saturn"
+
+static const char* SAT_video_name = SATURNVID_DRIVER_NAME;
 
 /* Private display data */
 

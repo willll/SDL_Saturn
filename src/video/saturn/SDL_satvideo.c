@@ -47,8 +47,6 @@ static char rcsid =
 
 #include <sgl.h>
 
-#define SATURNVID_DRIVER_NAME "saturn"
-
 #define TVSTAT      (*(volatile Uint16 *)0x25F80004)
 
 /* Initialization/Query functions */

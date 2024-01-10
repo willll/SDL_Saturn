@@ -314,7 +314,7 @@ void WarpSprite(SDL_Surface *screen, int x, int y)
 
 int main(/*int argc, char *argv[]*/)
 {
-	const SDL_VideoInfo *info;
+	const SDL_VideoInfo *info = NULL;
 	SDL_Surface *screen;
 	Uint8  video_bpp;
 	Uint32 videoflags;
