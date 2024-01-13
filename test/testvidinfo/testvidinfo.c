@@ -12,6 +12,10 @@ int main(int argc, char *argv[])
 	int i;
 	SDL_Rect **modes = NULL;
 
+
+	SDL_LogSetPriority(SDL_LOG_CATEGORY_VIDEO, SDL_LOG_PRIORITY_VERBOSE);
+	SDL_LogSetPriority(SDL_LOG_CATEGORY_RENDER, SDL_LOG_PRIORITY_VERBOSE);
+
 	if ( SDL_Init(SDL_INIT_VIDEO) < 0 ) {
 		SDL_LogCritical(SDL_LOG_CATEGORY_APPLICATION, "Couldn't initialize SDL: %s\n", SDL_GetError());
 		exit(1);
@@ -19,11 +23,11 @@ int main(int argc, char *argv[])
 
 	SDL_LogSetPriority(SDL_LOG_CATEGORY_APPLICATION, SDL_LOG_PRIORITY_VERBOSE);
 	SDL_LogSetPriority(SDL_LOG_CATEGORY_SYSTEM, SDL_LOG_PRIORITY_VERBOSE);
-	SDL_LogSetPriority(SDL_LOG_CATEGORY_VIDEO, SDL_LOG_PRIORITY_VERBOSE);
-	SDL_LogSetPriority(SDL_LOG_CATEGORY_RENDER, SDL_LOG_PRIORITY_VERBOSE);
 
 	info = SDL_GetVideoInfo();
 	if (info) {
+		SDL_LogVerbose(SDL_LOG_CATEGORY_APPLICATION,
+									"info %p\n", info);
 		if (info->vfmt) {
 			SDL_LogVerbose(SDL_LOG_CATEGORY_APPLICATION,
 										"Current display: %d bits-per-pixel\n", info->vfmt->BitsPerPixel);
@@ -35,6 +39,9 @@ int main(int argc, char *argv[])
 											"	Green Mask = 0x%.8x\n", info->vfmt->Gmask);
 				SDL_LogVerbose(SDL_LOG_CATEGORY_APPLICATION,
 											"	Blue Mask = 0x%.8x\n", info->vfmt->Bmask);
+			}  else {
+				SDL_LogCritical(SDL_LOG_CATEGORY_APPLICATION,
+					 							"palette NOT set");
 			}
 		} else {
 			SDL_LogCritical(SDL_LOG_CATEGORY_APPLICATION,
@@ -43,6 +50,80 @@ int main(int argc, char *argv[])
 	} else {
 		SDL_LogCritical(SDL_LOG_CATEGORY_APPLICATION,
 										"SDL_GetVideoInfo returned NULL ... not good\n");
+	}
+
+	if ( info->wm_available ) {
+		SDL_LogVerbose(SDL_LOG_CATEGORY_APPLICATION,
+									"A window manager is available\n");
+	} else {
+		SDL_LogVerbose(SDL_LOG_CATEGORY_APPLICATION,
+									"A window manager is NOT available\n");
+	}
+
+	if ( info->hw_available ) {
+		SDL_LogVerbose(SDL_LOG_CATEGORY_APPLICATION,
+										"Hardware surfaces are available (%dK video memory)\n",
+											info->video_mem);
+	} else {
+		SDL_LogVerbose(SDL_LOG_CATEGORY_APPLICATION,
+									"%dK video memory set !\n",
+									info->video_mem);
+	}
+
+	if ( info->blit_hw ) {
+		SDL_LogVerbose(SDL_LOG_CATEGORY_APPLICATION,
+										"Copy blits between hardware surfaces are accelerated\n");
+	} else {
+		SDL_LogVerbose(SDL_LOG_CATEGORY_APPLICATION,
+									"Copy blits NOT accelerated\n");
+	}
+
+	if ( info->blit_hw_CC ) {
+		SDL_LogVerbose(SDL_LOG_CATEGORY_APPLICATION,
+										"Colorkey blits between hardware surfaces are accelerated\n");
+	} else {
+		SDL_LogVerbose(SDL_LOG_CATEGORY_APPLICATION,
+									"Colorkey blits NOT accelerated\n");
+	}
+
+	if ( info->blit_hw_A ) {
+			SDL_LogVerbose(SDL_LOG_CATEGORY_APPLICATION,
+									"Alpha blits between hardware surfaces are accelerated\n");
+	} else {
+		SDL_LogVerbose(SDL_LOG_CATEGORY_APPLICATION,
+									"Alpha blits NOT accelerated\n");
+	}
+
+	if ( info->blit_sw ) {
+			SDL_LogVerbose(SDL_LOG_CATEGORY_APPLICATION,
+										"Copy blits from software surfaces to hardware surfaces are accelerated\n");
+	} else {
+		SDL_LogVerbose(SDL_LOG_CATEGORY_APPLICATION,
+										"SW Copy blits NOT accelerated\n");
+	}
+
+	if ( info->blit_sw_CC ) {
+			SDL_LogVerbose(SDL_LOG_CATEGORY_APPLICATION,
+										"Colorkey blits from software surfaces to hardware surfaces are accelerated\n");
+	} else {
+		SDL_LogVerbose(SDL_LOG_CATEGORY_APPLICATION,
+										"SW Colorkey blits NOT accelerated\n");
+	}
+
+	if ( info->blit_sw_A ) {
+			SDL_LogVerbose(SDL_LOG_CATEGORY_APPLICATION,
+										"Alpha blits from software surfaces to hardware surfaces are accelerated\n");
+	} else {
+		SDL_LogVerbose(SDL_LOG_CATEGORY_APPLICATION,
+										"SW Alpha blits NOT accelerated\n");
+	}
+
+	if ( info->blit_fill ) {
+			SDL_LogVerbose(SDL_LOG_CATEGORY_APPLICATION,
+											"Color fills on hardware surfaces are accelerated\n");
+	} else {
+		SDL_LogVerbose(SDL_LOG_CATEGORY_APPLICATION,
+										"Color fills NOT accelerated\n");
 	}
 
 	/* Print available fullscreen video modes */
@@ -62,55 +143,6 @@ int main(int argc, char *argv[])
 				SDL_LogVerbose(SDL_LOG_CATEGORY_APPLICATION,
 											"\t%dx%d\n", modes[i]->w, modes[i]->h);
 			}
-	}
-
-	if ( info->wm_available ) {
-		SDL_LogVerbose(SDL_LOG_CATEGORY_APPLICATION,
-									"A window manager is available\n");
-	} else {
-		SDL_LogVerbose(SDL_LOG_CATEGORY_APPLICATION,
-									"A window manager is NOT available\n");
-	}
-
-	if ( info->hw_available ) {
-		SDL_LogVerbose(SDL_LOG_CATEGORY_APPLICATION,
-										"Hardware surfaces are available (%dK video memory)\n",
-											info->video_mem);
-	}
-
-	if ( info->blit_hw ) {
-		SDL_LogVerbose(SDL_LOG_CATEGORY_APPLICATION,
-										"Copy blits between hardware surfaces are accelerated\n");
-	}
-
-	if ( info->blit_hw_CC ) {
-		SDL_LogVerbose(SDL_LOG_CATEGORY_APPLICATION,
-										"Colorkey blits between hardware surfaces are accelerated\n");
-	}
-
-	if ( info->blit_hw_A ) {
-			SDL_LogVerbose(SDL_LOG_CATEGORY_APPLICATION,
-									"Alpha blits between hardware surfaces are accelerated\n");
-	}
-
-	if ( info->blit_sw ) {
-			SDL_LogVerbose(SDL_LOG_CATEGORY_APPLICATION,
-										"Copy blits from software surfaces to hardware surfaces are accelerated\n");
-	}
-
-	if ( info->blit_sw_CC ) {
-			SDL_LogVerbose(SDL_LOG_CATEGORY_APPLICATION,
-										"Colorkey blits from software surfaces to hardware surfaces are accelerated\n");
-	}
-
-	if ( info->blit_sw_A ) {
-			SDL_LogVerbose(SDL_LOG_CATEGORY_APPLICATION,
-										"Alpha blits from software surfaces to hardware surfaces are accelerated\n");
-	}
-
-	if ( info->blit_fill ) {
-			SDL_LogVerbose(SDL_LOG_CATEGORY_APPLICATION,
-											"Color fills on hardware surfaces are accelerated\n");
 	}
 
 	for(;;);

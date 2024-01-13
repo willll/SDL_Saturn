@@ -199,17 +199,6 @@ static SDL_VideoDevice *SAT_CreateDevice(int devindex)
   /* set the attributes */
   device->name = SAT_video_name;
 
-  device->info.hw_available = 1;  /* Flag: Can you create hardware surfaces? */
-  device->info.wm_available = 0;
-  device->info.blit_hw = 1;       /* Flag: Accelerated blits HW --> HW */
-  device->info.blit_hw_CC = 1;    /* Flag: Accelerated blits with Colorkey */
-  device->info.blit_hw_A = 1;     /* Flag: Accelerated blits with Alpha */
-  device->info.blit_sw = 0;       /* Flag: Accelerated blits SW --> HW */
-  device->info.blit_sw_CC = 0;    /* Flag: Accelerated blits with Colorkey */
-  device->info.blit_sw_A = 0;     /* Flag: Accelerated blits with Alpha */
-  device->info.blit_fill = 1;     /* Flag: Accelerated color fill */
-  device->info.video_mem = 1536;  /* The total amount of video memory (in K) */
-
   device->info.vfmt = NULL;     	/* Value: The format of the video surface */
 
   return device;
@@ -231,6 +220,17 @@ int SAT_VideoInit(_THIS, SDL_PixelFormat *vformat)
   /* we change this during the SDL_SetVideoMode implementation... */
   vformat->BitsPerPixel = 8;
   vformat->BytesPerPixel = 1;
+
+  this->info.hw_available = SDL_TRUE;  /* Flag: Can you create hardware surfaces? */
+  this->info.wm_available = SDL_FALSE;
+  this->info.blit_hw = SDL_TRUE;       /* Flag: Accelerated blits HW --> HW */
+  this->info.blit_hw_CC = SDL_TRUE;    /* Flag: Accelerated blits with Colorkey */
+  this->info.blit_hw_A = SDL_TRUE;     /* Flag: Accelerated blits with Alpha */
+  this->info.blit_sw = SDL_FALSE;       /* Flag: Accelerated blits SW --> HW */
+  this->info.blit_sw_CC = SDL_FALSE;    /* Flag: Accelerated blits with Colorkey */
+  this->info.blit_sw_A = SDL_FALSE;     /* Flag: Accelerated blits with Alpha */
+  this->info.blit_fill = SDL_TRUE;     /* Flag: Accelerated color fill */
+  this->info.video_mem = 1536;  /* The total amount of video memory (in K) */
 
   /* We're done! */
   return(0);
