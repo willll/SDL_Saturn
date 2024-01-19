@@ -230,7 +230,7 @@ int SAT_VideoInit(_THIS, SDL_PixelFormat *vformat)
   this->info.blit_sw_CC = SDL_FALSE;    /* Flag: Accelerated blits with Colorkey */
   this->info.blit_sw_A = SDL_FALSE;     /* Flag: Accelerated blits with Alpha */
   this->info.blit_fill = SDL_TRUE;     /* Flag: Accelerated color fill */
-  this->info.video_mem = 1536;  /* The total amount of video memory (in K) */
+  this->info.video_mem = SATURN_VRAM_SIZE;  /* The total amount of video memory (in K) */
 
   /* We're done! */
   return(0);
@@ -425,7 +425,7 @@ SDL_Surface *SAT_SetVideoMode(_THIS, SDL_Surface *current,
       return(NULL);
     }
 
-    memset(this->hidden->buffer, 0, width * height );
+    memset(this->hidden->buffer, 0, width * height * (bpp / 8) );
 
     slPriorityNbg0(7);  // avant rbg0
     slPriorityNbg1(6);

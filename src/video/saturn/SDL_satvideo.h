@@ -36,6 +36,7 @@ static char rcsid =
 #define _THIS	SDL_VideoDevice *this
 
 #define SATURNVID_DRIVER_NAME "saturn"
+#define SATURN_VRAM_SIZE 1536
 
 static const char* SAT_video_name = SATURNVID_DRIVER_NAME;
 

@@ -1,6 +1,43 @@
 
 /* Simple program:  Move N sprites around on the screen as fast as possible */
 
+/*
+#define        VDP2_VRAM_B0    0x25e40000
+#define        VDP2_VRAM_B1    0x25e60000
+
+#undef cgaddress
+#undef pal
+#undef TEXDEF
+
+#define    cgaddress    0x8000 //SpriteBufSize
+#define    cgaddress8    cgaddress/8
+#define pal1 COL_256
+#define TEXDEF(h,v,presize)        {h,v,(cgaddress+(((presize)*4)>>(pal1)))/8,(((h)&0x1f8)<<5 | (v))}
+
+do {
+DMA_ScuMemCopy((uint8*)(SpriteVRAM + cgaddress), (uint8*)rgb, 12*16*4);
+    SCU_DMAWait();
+
+    TEXTURE *txptr = (TEXTURE *)&tex_spr[1]; 
+    *txptr = TEXDEF(w, (16>>6), 0);
+//SWAP(_txt1Layer, _txt2Layer);
+    SPRITE user_sprite;
+    user_sprite.CTRL= 0;
+    user_sprite.PMOD= CL256Bnk| ECdis | 0x0800;// | ECenb | SPdis;  // pas besoin pour les sprites
+    user_sprite.SRCA= (cgaddress) / 8;
+    user_sprite.COLR= 0;
+
+    user_sprite.SIZE=(w/8)<<8|h;
+    user_sprite.XA=x;
+    user_sprite.YA=y;
+    user_sprite.GRDA=0;
+ #define        toFIXED2(a)        ((FIXED)(65536.0 * (a)))
+    slSetSprite(&user_sprite, toFIXED2(10));    // à remettre // ennemis et objets
+    slSynch();`
+}
+while(1);
+*/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
