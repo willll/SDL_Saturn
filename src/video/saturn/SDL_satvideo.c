@@ -425,7 +425,7 @@ SDL_Surface *SAT_SetVideoMode(_THIS, SDL_Surface *current,
       return(NULL);
     }
 
-    memset(this->hidden->buffer, 0, width * height * (bpp / 8) );
+    memset(this->hidden->buffer, 0, width * height );
 
     slPriorityNbg0(7);  // avant rbg0
     slPriorityNbg1(6);
