@@ -28,6 +28,10 @@ Thanks!
 
 # How to Build
 
+rm -rf * && cmake -DCMAKE_BUILD_TYPE=Release \
+      -DCMAKE_TOOLCHAIN_FILE=$SATURN_CMAKE/sega_saturn.cmake \
+      -DCMAKE_INSTALL_PREFIX=/saturn/SDL .. && make && make install
+
 rm -rf * && cmake -DCMAKE_BUILD_TYPE=Debug \
       -DCMAKE_TOOLCHAIN_FILE=$SATURN_CMAKE/sega_saturn.cmake \
       -DCMAKE_INSTALL_PREFIX=/saturn/SDL .. && make && make install

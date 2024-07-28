@@ -1,10 +1,17 @@
-cmake_minimum_required( VERSION 3.0 )
+cmake_minimum_required( VERSION 3.5 )
 
-set( SEGALIB $ENV{SATURN_SBL}/segalib )
-set( SEGASGL $ENV{SATURN_SGL} )
-
-set( SATURN_COMMON $ENV{SATURN_COMMON} )
-set( SATURN_CMAKE $ENV{SATURN_CMAKE} )
+if (NOT DEFINED SEGALIB)
+  set( SEGALIB $ENV{SATURN_SBL}/segalib )
+endif()
+if (NOT DEFINED SEGASGL)
+  set( SEGASGL $ENV{SATURN_SGL} )
+endif()
+if (NOT DEFINED SATURN_COMMON)
+  set( SATURN_COMMON $ENV{SATURN_COMMON} )
+endif()
+if (NOT DEFINED SATURN_CMAKE)
+  set( SATURN_CMAKE $ENV{SATURN_CMAKE} )
+endif()
 
 find_package(SDL_Saturn REQUIRED)
 
