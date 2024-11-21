@@ -9,12 +9,22 @@ set( CMAKE_EXE_LINKER_FLAGS "" )
 set( CMAKE_STATIC_LIBRARY_SUFFIX ".a" )
 set( CMAKE_STATIC_LIBRARY_PREFIX "" )
 
-set( SEGALIB $ENV{SATURN_SBL}/segalib )
-set( SEGASGL $ENV{SATURN_SGL} )
+if (NOT DEFINED SEGALIB)
+  set( SEGALIB $ENV{SATURN_SBL}/segalib )
+endif()
+if (NOT DEFINED SEGASGL)
+  set( SEGASGL $ENV{SATURN_SGL} )
+endif()
 
-set( SATURN_COMMON $ENV{SATURN_COMMON} )
-set( SATURN_CMAKE $ENV{SATURN_CMAKE} )
-set( SATURN_ROOT $ENV{SATURN_ROOT} )
+if (NOT DEFINED SATURN_COMMON)
+  set( SATURN_COMMON $ENV{SATURN_COMMON} )
+endif()
+if (NOT DEFINED SATURN_CMAKE)
+  set( SATURN_CMAKE $ENV{SATURN_CMAKE} )
+endif()
+if (NOT DEFINED SATURN_ROOT)
+  set( SATURN_ROOT $ENV{SATURN_ROOT} )
+endif()
 
 set( SDL_LIB ${CMAKE_CURRENT_SOURCE_DIR} )
 
@@ -136,7 +146,6 @@ target_link_options(
     "SHELL:-m2 -nostartfiles"
     "SHELL:-m2 -specs=nosys.specs"
     "SHELL:-T${SATURN_COMMON}/Saturn.lnk"
-    "SHELL:-lc -lgcc -lm"
 )
 
 target_link_libraries( sdl PUBLIC ${SEGASGL}/lib/sglarea.o )
