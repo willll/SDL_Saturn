@@ -34,6 +34,7 @@
 
 //#if HAVE_STDIO_H
 #include <stdio.h>
+#include <stdint.h>
 //#endif
 
 #if defined(__ANDROID__)
@@ -287,7 +288,7 @@ void SDL_LogMessageV(int category, SDL_LogPriority priority, const char *fmt, va
 {
     char *message = NULL;
     char stack_buf[SDL_MAX_LOG_MESSAGE_STACK];
-    size_t len_plus_term;
+    size_t len_plus_term = 0;
     int len;
     va_list aq;
 

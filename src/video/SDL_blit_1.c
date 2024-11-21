@@ -155,7 +155,7 @@ static void Blit1to2(SDL_BlitInfo *info)
 			src += srcskip;
 			dst += dstskip;
 		}
-	} else { 
+	} else {
 		while ( height-- ) {
 			/* Copy in 4 pixel chunks */
 			for ( c=width/4; c; --c ) {
@@ -290,7 +290,7 @@ static void Blit1to1Key(SDL_BlitInfo *info)
 	int dstskip = info->d_skip;
 	Uint8 *palmap = info->table;
 	Uint32 ckey = info->src->colorkey;
-        
+
 	if ( palmap ) {
 		while ( height-- ) {
 			DUFFS_LOOP(
@@ -461,18 +461,18 @@ static void Blit1toNAlphaKey(SDL_BlitInfo *info)
 	const SDL_Color *srcpal	= info->src->palette->colors;
 	Uint32 ckey = srcfmt->colorkey;
 	int dstbpp;
+    Uint32 pixel;
 	const int A = srcfmt->alpha;
 
 	/* Set up some basic variables */
 	dstbpp = dstfmt->BytesPerPixel;
 
 	while ( height-- ) {
-	        int sR, sG, sB;
+	    int sR, sG, sB;
 		int dR, dG, dB;
 		DUFFS_LOOP(
 		{
 			if ( *src != ckey ) {
-			        Uint32 pixel;
 				sR = srcpal[*src].r;
 				sG = srcpal[*src].g;
 				sB = srcpal[*src].b;

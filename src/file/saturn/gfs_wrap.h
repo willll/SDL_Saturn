@@ -14,12 +14,14 @@
 
 struct SDL_RWops;
 
-typedef struct {
+typedef struct GFS_FILE {
 	GfsHn  fid;       // Pointer to GFS file structure
 	long f_size;      // file size in *bytes*
 	long  f_seek_pos; // seek pointer position in *bytes*
 	Uint32 file_hash; // file hash
 } GFS_FILE;
+
+#define FILE GFS_FILE
 
 /* Seek to 'offset' relative to whence, one of stdio's whence values:
 	SEEK_SET, SEEK_CUR, SEEK_END

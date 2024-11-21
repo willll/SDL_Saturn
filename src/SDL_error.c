@@ -124,7 +124,7 @@ void SDL_SetError (const char *fmt, ...)
 	va_end(ap);
 #ifdef ENABLE_SATURN
   static unsigned int * lowworkram_error = (unsigned int*)(0x200100);
-  sprintf(lowworkram_error, "SDL_SetError: %s", SDL_GetError());
+  sprintf((char *)lowworkram_error, "SDL_SetError: %s", SDL_GetError());
   lowworkram_error+=0x10;
   slPrint("ERR", slLocate (1,1));
 #else

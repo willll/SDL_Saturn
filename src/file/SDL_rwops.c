@@ -37,7 +37,6 @@ static char rcsid =
 #include "SDL_error.h"
 #include "SDL_log.h"
 #include "SDL_rwops.h"
-#include "saturn/gfs_wrap.h"
 /* Functions to read/write stdio file pointers */
 
 

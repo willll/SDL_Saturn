@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 3.5)
 
 set( CMAKE_SYSTEM_NAME Generic )
 set( CMAKE_VERBOSE_MAKEFILE ON )
@@ -134,6 +134,7 @@ target_link_options(
     "SHELL:-Xlinker --strip-debug"
     "SHELL:-Xlinker -fno-lto"
     "SHELL:-m2 -nostartfiles"
+    "SHELL:-m2 -specs=nosys.specs"
     "SHELL:-T${SATURN_COMMON}/Saturn.lnk"
     "SHELL:-lc -lgcc -lm"
 )

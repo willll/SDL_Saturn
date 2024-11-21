@@ -87,7 +87,7 @@ SDL_Surface * SDL_LoadBMP_RW (SDL_RWops *src, int freesrc)
 	Sint32 biXPelsPerMeter;
 	Sint32 biYPelsPerMeter;
 	Uint32 biClrUsed;
-	Uint32 biClrImportant;
+	//Uint32 biClrImportant;
 
 	/* Make sure we are passed a valid data source */
 	surface = NULL;
@@ -140,7 +140,7 @@ SDL_Surface * SDL_LoadBMP_RW (SDL_RWops *src, int freesrc)
 		biXPelsPerMeter	= 0;
 		biYPelsPerMeter	= 0;
 		biClrUsed	= 0;
-		biClrImportant	= 0;
+		//biClrImportant	= 0;
 	} else {
 		biWidth		= SDL_ReadLE32(src);
 		biHeight	= SDL_ReadLE32(src);
@@ -151,16 +151,16 @@ SDL_Surface * SDL_LoadBMP_RW (SDL_RWops *src, int freesrc)
 		biXPelsPerMeter	= SDL_ReadLE32(src);
 		biYPelsPerMeter	= SDL_ReadLE32(src);
 		biClrUsed	= SDL_ReadLE32(src);
-		biClrImportant	= SDL_ReadLE32(src);
+		/*biClrImportant	=*/ SDL_ReadLE32(src);
 	}
 
 	/* Check for read error */
 	if ( strcmp(SDL_GetError(), "") != 0 ) {
 		was_error = 1;
-    SDL_LogError(SDL_LOG_CATEGORY_SYSTEM,
-                    "%s l%d : Read error\n",
-                    __FUNCTION__,
-                    __LINE__);
+        SDL_LogError(SDL_LOG_CATEGORY_SYSTEM,
+                        "%s l%d : Read error\n",
+                        __FUNCTION__,
+                        __LINE__);
 		goto done;
 	}
 
@@ -224,11 +224,11 @@ SDL_Surface * SDL_LoadBMP_RW (SDL_RWops *src, int freesrc)
 			break;
 		default:
 			SDL_SetError("Compressed BMP files not supported");
-      SDL_LogError(SDL_LOG_CATEGORY_VIDEO,
-                      "%s l%d : %s\n",
-                      __FUNCTION__,
-                      __LINE__,
-                      SDL_GetError());
+          SDL_LogError(SDL_LOG_CATEGORY_VIDEO,
+                          "%s l%d : %s\n",
+                          __FUNCTION__,
+                          __LINE__,
+                          SDL_GetError());
 			was_error = 1;
 			goto done;
 	}

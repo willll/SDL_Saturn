@@ -34,25 +34,27 @@ static char rcsid =
 
 #include <stdlib.h>
 #include <stdio.h>		/* For the definition of NULL */
+#include <string.h>     /* For the definition of memset */
 
+#include "SDL_saturn.h"
 #include "SDL_error.h"
 #include "SDL_log.h"
 #include "SDL_joystick.h"
 #include "../SDL_sysjoystick.h"
 #include "../SDL_joystick_c.h"
 
-#include	<sgl.h>
-#include	<sega_per.h>
+#include <sgl.h>
+#include <sega_per.h>
 
 #define MAX_PORT	     16	/* 2 physical ports */
 #define MAX_JOYSTICKS	 2	/* only 2 are supported in the multimedia API */
 #define MAX_AXES	     2	/* each joystick can have up to 6 axes */
-#define MAX_BUTTONS	   9	/* and 8 buttons                      */
+#define MAX_BUTTONS	     9	/* and 8 buttons                      */
 #define	MAX_HATS	     0
 
-#define SDL_MAX_AXIS  32767
-#define SDL_MIN_AXIS  -32768
-#define SDL_AXIS_STEP  128
+#define SDL_MAX_AXIS    32767
+#define SDL_MIN_AXIS    -32768
+#define SDL_AXIS_STEP   128
 
 #define	MAX_DATA_SIZE	6
 
@@ -179,9 +181,6 @@ static int SDL_SYS_JoystickCount(void);
  */
 static int SDL_SYS_JoystickLoopUp(void)
 {
-  char text_buffer[256];
-  memset(text_buffer, 0, 256);
-
   int nReturn = 0;
 
   PerDigital	*pptr  = Smpc_Peripheral;
@@ -205,6 +204,9 @@ static int SDL_SYS_JoystickLoopUp(void)
             SDL_SetError("Device found\n");
             ++nReturn;
         } else {
+            char text_buffer[256];
+            memset(text_buffer, 0, 256);
+
             if(pptr) {
               sprintf(text_buffer, "Device[%d] ID(%d): not found\n", m, pptr->id);
             } else {
@@ -243,7 +245,7 @@ static int SDL_SYS_JoystickCount(void) {
  */
 int SDL_SYS_JoystickInit(void)
 {
-  int nReturn = MAX_JOYSTICKS;
+    int nReturn = MAX_JOYSTICKS;
 
 	return nReturn;
 }
@@ -274,9 +276,9 @@ int SDL_SYS_JoystickOpen(SDL_Joystick *joystick)
 
   if (SYS_Joystick_addr[joystick->index].id != -1) {
   	/* allocate memory for system specific hardware data */
-  	joystick->hwdata = (struct joystick_hwdata *) malloc(sizeof(*joystick->hwdata));
-  	if (joystick->hwdata == NULL)
-  	{
+  	joystick->hwdata = (struct joystick_hwdata *) SDL_malloc(sizeof(*joystick->hwdata));
+
+  	if (joystick->hwdata == NULL) {
   		SDL_OutOfMemory();
   	} else {
     	memset(joystick->hwdata, 0, sizeof(*joystick->hwdata));
@@ -285,7 +287,8 @@ int SDL_SYS_JoystickOpen(SDL_Joystick *joystick)
     	joystick->nbuttons = MAX_BUTTONS;
     	joystick->naxes = MAX_AXES;
     	joystick->nhats = MAX_HATS;
-      nReturn = 0;
+
+        nReturn = 0;
     }
   }
 
@@ -326,26 +329,32 @@ void SDL_SYS_JoystickUpdate(SDL_Joystick *joystick)
           Sint16 axis_0 = SDL_JoystickGetAxis(joystick, 0);
           Sint16 axis_1 = SDL_JoystickGetAxis(joystick, 1);;
 
-          if (padd&PER_DGT_KD)
+          if (padd&PER_DGT_KD) {
             if (axis_1 > SDL_MAX_AXIS - SDL_AXIS_STEP)
               axis_1 = SDL_MAX_AXIS;
             else
               axis_1 += SDL_AXIS_STEP;
-          else if (padd&PER_DGT_KU)
-            if (axis_1 < SDL_MIN_AXIS + SDL_AXIS_STEP)
-              axis_1 = SDL_MIN_AXIS;
-            else
-              axis_1 -= SDL_AXIS_STEP;
-          if (padd&PER_DGT_KR)
+          } else {
+              if (padd&PER_DGT_KU) {
+                if (axis_1 < SDL_MIN_AXIS + SDL_AXIS_STEP)
+                  axis_1 = SDL_MIN_AXIS;
+                else
+                  axis_1 -= SDL_AXIS_STEP;
+              }
+          }
+          if (padd&PER_DGT_KR) {
             if (axis_0 > SDL_MAX_AXIS - SDL_AXIS_STEP)
                 axis_0 = SDL_MAX_AXIS;
               else
-              axis_0 += SDL_AXIS_STEP;
-          else if (padd&PER_DGT_KL)
-            if (axis_0 < SDL_MIN_AXIS + SDL_AXIS_STEP)
-              axis_0 = SDL_MIN_AXIS;
-            else
-              axis_0 -= SDL_AXIS_STEP;
+                axis_0 += SDL_AXIS_STEP;
+          } else {
+              if (padd&PER_DGT_KL) {
+                if (axis_0 < SDL_MIN_AXIS + SDL_AXIS_STEP)
+                  axis_0 = SDL_MIN_AXIS;
+                else
+                  axis_0 -= SDL_AXIS_STEP;
+              }
+          }
 
           if (SDL_JoystickGetAxis(joystick, 0) != axis_0) {
             SDL_PrivateJoystickAxis(joystick, 0, axis_0);
@@ -373,7 +382,7 @@ void SDL_SYS_JoystickClose(SDL_Joystick *joystick)
 
 	if (joystick->hwdata != NULL) {
 		/* free system specific hardware data */
-		free(joystick->hwdata);
+		SDL_free(joystick->hwdata);
 	}
 }
 

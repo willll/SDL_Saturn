@@ -33,6 +33,7 @@ static char rcsid =
 #include "SDL_endian.h"
 #include "SDL_fatal.h"
 #include "SDL_log.h"
+#include "SDL_log_c.h"
 #ifndef DISABLE_VIDEO
 #include "SDL_leaks.h"
 #endif

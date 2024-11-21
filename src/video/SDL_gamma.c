@@ -32,11 +32,13 @@ static char rcsid =
 #ifdef USE_MATH_H
 #include <math.h>
 #endif
+
 #include <stdlib.h>
 #include <string.h>
 
 #include "SDL_error.h"
 #include "SDL_sysvideo.h"
+#include "SDL_saturn.h"
 
 #ifdef USE_MATH_H
 static void CalculateGammaRamp(float gamma, Uint16 *ramp)
@@ -96,7 +98,7 @@ int SDL_SetGamma(float red, float green, float blue)
 {
 	int succeeded;
 	SDL_VideoDevice *video = current_video;
-	SDL_VideoDevice *this  = current_video;	
+	SDL_VideoDevice *this  = current_video;
 
 	succeeded = -1;
 #ifdef USE_MATH_H
@@ -126,7 +128,7 @@ int SDL_GetGamma(float *red, float *green, float *blue)
 {
 	int succeeded;
 	SDL_VideoDevice *video = current_video;
-	SDL_VideoDevice *this  = current_video;	
+	SDL_VideoDevice *this  = current_video;
 
 	succeeded = -1;
 #ifdef USE_MATH_H
@@ -155,7 +157,7 @@ int SDL_SetGammaRamp(Uint16 *red, Uint16 *green, Uint16 *blue)
 {
 	int succeeded;
 	SDL_VideoDevice *video = current_video;
-	SDL_VideoDevice *this  = current_video;	
+	SDL_VideoDevice *this  = current_video;
 	SDL_Surface *screen = SDL_PublicSurface;
 
 	/* Verify the screen parameter */
@@ -187,7 +189,7 @@ int SDL_SetGammaRamp(Uint16 *red, Uint16 *green, Uint16 *blue)
 		/* If physical palette has been set independently, use it */
 		if(video->physpal)
 		        pal = video->physpal;
-		      
+
 		SDL_SetPalette(screen, SDL_PHYSPAL,
 			       pal->colors, 0, pal->ncolors);
 		return 0;
@@ -206,7 +208,7 @@ int SDL_SetGammaRamp(Uint16 *red, Uint16 *green, Uint16 *blue)
 int SDL_GetGammaRamp(Uint16 *red, Uint16 *green, Uint16 *blue)
 {
 	SDL_VideoDevice *video = current_video;
-	SDL_VideoDevice *this  = current_video;	
+	SDL_VideoDevice *this  = current_video;
 
 	/* Lazily allocate the gamma table */
 	if ( ! video->gamma ) {

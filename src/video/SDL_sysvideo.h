@@ -287,7 +287,7 @@ struct SDL_VideoDevice {
 
 	/* * * */
 	/* The function used to dispose of this structure */
-	void (*free)(_THIS);
+	void (*Free)(_THIS);
 };
 #undef _THIS
 

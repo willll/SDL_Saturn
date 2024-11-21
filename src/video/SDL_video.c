@@ -44,6 +44,7 @@ static char rcsid =
 #include "../events/SDL_events_c.h"
 #include "SDL_cursor_c.h"
 #include "SDL_log.h"
+#include "SDL_saturn.h"
 
 /* Available video drivers */
 static VideoBootStrap *bootstrap[] = {
@@ -1277,7 +1278,7 @@ void SDL_VideoQuit (void)
 		}
 
 		/* Finish cleaning up video subsystem */
-		video->free(this);
+		video->Free(this);
 		current_video = NULL;
 	}
 	return;

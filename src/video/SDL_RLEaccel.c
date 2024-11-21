@@ -196,27 +196,27 @@ do {							\
     do {								\
         int i;								\
 	Uint8 *src = from;						\
-	Uint8 *dst = to;						\
+	Uint8 *pdst = to;						\
 	for(i = 0; i < (int)(length); i++) {				\
 	    Uint32 s, d;						\
 	    unsigned rs, gs, bs, rd, gd, bd;				\
 	    switch(bpp) {						\
 	    case 2:							\
 		s = *(Uint16 *)src;					\
-		d = *(Uint16 *)dst;					\
+		d = *(Uint16 *)pdst;					\
 		break;							\
 	    case 3:							\
 		if(SDL_BYTEORDER == SDL_BIG_ENDIAN) {			\
 		    s = (src[0] << 16) | (src[1] << 8) | src[2];	\
-		    d = (dst[0] << 16) | (dst[1] << 8) | dst[2];	\
+		    d = (pdst[0] << 16) | (pdst[1] << 8) | pdst[2];	\
 		} else {						\
 		    s = (src[2] << 16) | (src[1] << 8) | src[0];	\
-		    d = (dst[2] << 16) | (dst[1] << 8) | dst[0];	\
+		    d = (pdst[2] << 16) | (pdst[1] << 8) | pdst[0];	\
 		}							\
 		break;							\
 	    case 4:							\
 		s = *(Uint32 *)src;					\
-		d = *(Uint32 *)dst;					\
+		d = *(Uint32 *)pdst;					\
 		break;							\
 	    }								\
 	    RGB_FROM_PIXEL(s, fmt, rs, gs, bs);				\
@@ -227,21 +227,21 @@ do {							\
 	    PIXEL_FROM_RGB(d, fmt, rd, gd, bd);				\
 	    switch(bpp) {						\
 	    case 2:							\
-		*(Uint16 *)dst = d;					\
+		*(Uint16 *)pdst = d;					\
 		break;							\
 	    case 3:							\
 		if(SDL_BYTEORDER == SDL_BIG_ENDIAN) {			\
-		    dst[0] = d >> 16;					\
-		    dst[1] = d >> 8;					\
-		    dst[2] = d;						\
+		    pdst[0] = d >> 16;					\
+		    pdst[1] = d >> 8;					\
+		    pdst[2] = d;						\
 		} else {						\
-		    dst[0] = d;						\
-		    dst[1] = d >> 8;					\
-		    dst[2] = d >> 16;					\
+		    pdst[0] = d;						\
+		    pdst[1] = d >> 8;					\
+		    pdst[2] = d >> 16;					\
 		}							\
 		break;							\
 	    case 4:							\
-		*(Uint32 *)dst = d;					\
+		*(Uint32 *)pdst = d;					\
 		break;							\
 	    }								\
 	    src += bpp;							\
@@ -844,13 +844,12 @@ int SDL_RLEAlphaBlit(SDL_Surface *src, SDL_Rect *srcrect,
 		    run = ((Uint16 *)srcbuf)[1];			 \
 		    srcbuf += 4;					 \
 		    if(run) {						 \
-			Ptype *dst = (Ptype *)dstbuf + ofs;		 \
+			Ptype *pdistance = (Ptype *)dstbuf + ofs;		 \
 			unsigned i;					 \
 			for(i = 0; i < run; i++) {			 \
-			    Uint32 src = *(Uint32 *)srcbuf;		 \
-			    do_blend(src, *dst);			 \
+			    do_blend(*(Uint32 *)srcbuf, *pdistance);			 \
 			    srcbuf += 4;				 \
-			    dst++;					 \
+			    pdistance++;					 \
 			}						 \
 			ofs += run;					 \
 		    }							 \
@@ -1269,7 +1268,7 @@ static int RLEColorkeySurface(SDL_Surface *surface)
         Uint8 *rlebuf, *dst;
 	int maxn;
 	int y;
-	Uint8 *srcbuf, *curbuf, *lastline;
+	Uint8 *srcbuf, *lastline;
 	int maxsize = 0;
 	int skip, run;
 	int bpp = surface->format->BytesPerPixel;
@@ -1305,7 +1304,6 @@ static int RLEColorkeySurface(SDL_Surface *surface)
 
 	/* Set up the conversion */
 	srcbuf = (Uint8 *)surface->pixels+surface->offset;
-	curbuf = srcbuf;
 	maxn = bpp == 4 ? 65535 : 255;
 	skip = run = 0;
 	dst = rlebuf;
@@ -1331,7 +1329,7 @@ static int RLEColorkeySurface(SDL_Surface *surface)
 	    int x = 0;
 	    int blankline = 0;
 	    do {
-		int run, skip, len;
+		int len;
 		int runstart;
 		int skipstart = x;
 

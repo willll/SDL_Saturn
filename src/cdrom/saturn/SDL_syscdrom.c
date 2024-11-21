@@ -95,7 +95,7 @@ static int SDL_SYS_CDOpen(int drive)
 #define	TRACK_CDDA	0
 static int SDL_SYS_CDGetTOC(SDL_CD *cdrom)
 {
-  cdrom;
+    (void)cdrom;
 
 	return 0;
 }
@@ -103,53 +103,56 @@ static int SDL_SYS_CDGetTOC(SDL_CD *cdrom)
 /* Get CD-ROM status */
 static CDstatus SDL_SYS_CDStatus(SDL_CD *cdrom, int *position)
 {
-  cdrom;
-  position;
+  (void)cdrom;
+  (void)position;
 
-	return	CD_ERROR;
+  return	CD_ERROR;
 }
 
 /* Start play */
 static int SDL_SYS_CDPlay(SDL_CD *cdrom, int start, int length)
 {
-  cdrom;
-  start;
-  length;
-	return -1;
+  (void)cdrom;
+  (void)start;
+  (void)length;
+
+  return -1;
 }
 
 /* Pause play */
 static int SDL_SYS_CDPause(SDL_CD *cdrom)
 {
-	cdrom;
+    (void)cdrom;
+
 	return -1;
 }
 
 /* Resume play */
 static int SDL_SYS_CDResume(SDL_CD *cdrom)
 {
-	cdrom;
+	(void)cdrom;
+
 	return -1;
 }
 
 /* Stop play */
 static int SDL_SYS_CDStop(SDL_CD *cdrom)
 {
-  cdrom;
+    (void)cdrom;
 	return -1;
 }
 
 /* Eject the CD-ROM */
 static int SDL_SYS_CDEject(SDL_CD *cdrom)
 {
-  cdrom;
+    (void)cdrom;
 	return -1;
 }
 
 /* Close the CD-ROM handle */
 static void SDL_SYS_CDClose(SDL_CD *cdrom)
 {
-  cdrom;
+    (void)cdrom;
 }
 
 void SDL_SYS_CDQuit(void)

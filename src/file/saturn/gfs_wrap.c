@@ -8,6 +8,8 @@
 #include "SDL_rwops.h"
 #include "SDL_log.h"
 
+#include <ctype.h> 
+
 char 	*strtok (char *__restrict, const char *__restrict);
 int	 strncasecmp(const char *, const char *, size_t) __pure;
 

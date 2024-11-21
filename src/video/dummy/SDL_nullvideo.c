@@ -138,7 +138,7 @@ static SDL_VideoDevice *DUMMY_CreateDevice(int devindex)
 	device->InitOSKeymap = DUMMY_InitOSKeymap;
 	device->PumpEvents = DUMMY_PumpEvents;
 
-	device->free = DUMMY_DeleteDevice;
+	device->Free = DUMMY_DeleteDevice;
 
 	return device;
 }

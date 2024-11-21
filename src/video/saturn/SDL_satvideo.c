@@ -64,7 +64,7 @@ static void SAT_FreeHWSurface(_THIS, SDL_Surface *surface);
 
 /* etc. */
 static void SAT_UpdateRects(_THIS, int numrects, SDL_Rect *rects);
-static int SAT_FillRect (SDL_Surface *dst, SDL_Rect *dstrect, Uint32 color);
+static int SAT_FillRect (_THIS, SDL_Surface *dst, SDL_Rect *dstrect, Uint32 color);
 
 /* SEGA Saturn driver bootstrap functions */
 inline static void Pal2CRAM( Uint16 *Pal_Data , void *Col_Adr , Uint32 suu );
@@ -72,11 +72,11 @@ inline static void Pal2CRAM( Uint16 *Pal_Data , void *Col_Adr , Uint32 suu );
 TEXTURE tex_spr[4];
 
 const static SDL_Rect
-        	RECT_320x224 = {0,0,320,224},
-        	RECT_320x240 = {0,0,320,240},
-          RECT_320x256 = {0,0,320,256},
-          RECT_320x448 = {0,0,320,448},
-          RECT_320x480 = {0,0,320,480},
+        RECT_320x224 = {0,0,320,224},
+        RECT_320x240 = {0,0,320,240},
+        RECT_320x256 = {0,0,320,256},
+        RECT_320x448 = {0,0,320,448},
+        RECT_320x480 = {0,0,320,480},
           RECT_320x512 = {0,0,320,512},
           RECT_352x224 = {0,0,352,224},
           RECT_352x240 = {0,0,352,240},
@@ -98,9 +98,9 @@ const static SDL_Rect
           RECT_704x512 = {0,0,704,512};
 
 const static SDL_Rect *vid_modes[] = {
-        	&RECT_320x224,
-        	&RECT_320x240,
-        	&RECT_320x256,
+        &RECT_320x224,
+        &RECT_320x240,
+        &RECT_320x256,
           &RECT_320x448,
           &RECT_320x480,
           &RECT_320x512,
@@ -120,8 +120,8 @@ const static SDL_Rect *vid_modes[] = {
           &RECT_704x256,
           &RECT_704x448,
           &RECT_704x480,
-          &RECT_704x512,
-        	NULL
+        &RECT_704x512,
+        NULL
 };
 
 static int SAT_Available(void)
@@ -194,7 +194,7 @@ static SDL_VideoDevice *SAT_CreateDevice(int devindex)
   device->GetWMInfo = NULL;
   device->InitOSKeymap = SAT_InitOSKeymap;
   device->PumpEvents = SAT_PumpEvents;
-  device->free = SAT_DeleteDevice;
+  device->Free = SAT_DeleteDevice;
 
   /* set the attributes */
   device->name = SAT_video_name;
@@ -246,12 +246,12 @@ SDL_Rect **SAT_ListModes(_THIS, SDL_PixelFormat *format, Uint32 flags)
         case 11:
         case 15:
         case 24:
-      		return &vid_modes;
+      		return (SDL_Rect **) &vid_modes;
       	default:
       		return (SDL_Rect **) -1;
     	}
     } else {
-      return &vid_modes;
+      return (SDL_Rect **) &vid_modes;
     }
   }
 
@@ -402,7 +402,7 @@ SDL_Surface *SAT_SetVideoMode(_THIS, SDL_Surface *current,
 
     slScrAutoDisp(NBG0ON| NBG1ON);
 
-    slScrCycleSet(0x55EEEEEE , NULL , 0x044EEEEE , NULL);
+    slScrCycleSet(0x55EEEEEE , 0 , 0x044EEEEE , 0);
 
 
     if ( this->hidden->buffer ) {
@@ -457,15 +457,17 @@ SDL_Surface *SAT_SetVideoMode(_THIS, SDL_Surface *current,
   /* We don't actually allow hardware surfaces other than the main one */
   static int SAT_AllocHWSurface(_THIS, SDL_Surface *surface)
   {
-    SDL_Surface *screeny = (SDL_Surface*)malloc(sizeof(SDL_Surface));
+    /*SDL_Surface *screeny = (SDL_Surface*)malloc(sizeof(SDL_Surface));
   	screeny->pixels = (unsigned char*)malloc(sizeof(unsigned char) * surface->w * surface->h);
-  //	screeny->pixels = (unsigned char*)0x002E0000;
   	screeny->pitch = surface->w;
   	screeny->w     = surface->w;
   	screeny->h     = surface->h;
 
-  	return screeny;
+  	return screeny;*/
+
+    return(-1);
   }
+
   static void SAT_FreeHWSurface(_THIS, SDL_Surface *surface)
   {
     return;
@@ -523,11 +525,10 @@ SDL_Surface *SAT_SetVideoMode(_THIS, SDL_Surface *current,
     }
   }
 
-  int SAT_FillRect(SDL_Surface *dst, SDL_Rect *dstrect, Uint32 color)
+  int SAT_FillRect(_THIS, SDL_Surface *dst, SDL_Rect *dstrect, Uint32 color)
   {
-  	if((dst)!=NULL)
-  		if((dstrect)!=NULL)
-  		{
+  	if((dst)!=NULL) {
+  		if((dstrect)!=NULL) {
   			Uint8*d = (Uint8*)dst->pixels + dstrect->x + dstrect->y * dst->w;
   			int w = dstrect->w;
   			int p = dst->pitch;
@@ -541,6 +542,7 @@ SDL_Surface *SAT_SetVideoMode(_THIS, SDL_Surface *current,
   		{
   		   memset(dst->pixels, color, dst->w*dst->h);
   		}
+    }
 
   	return 0;
   }

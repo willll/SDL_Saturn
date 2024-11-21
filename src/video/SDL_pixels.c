@@ -38,6 +38,7 @@ static char rcsid =
 #include "SDL_blit.h"
 #include "SDL_pixels_c.h"
 #include "SDL_RLEaccel_c.h"
+#include "SDL_saturn.h"
 
 /* Helper functions */
 /*
@@ -465,6 +466,7 @@ static Uint8 *Map1toN(SDL_Palette *src, SDL_PixelFormat *dst)
 	int i;
 	int  bpp;
 	unsigned alpha;
+    Uint16 pixel;
 
 	bpp = ((dst->BytesPerPixel == 3) ? 4 : dst->BytesPerPixel);
 	map = (Uint8 *)malloc(src->ncolors*bpp);

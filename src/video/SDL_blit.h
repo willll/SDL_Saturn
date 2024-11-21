@@ -192,16 +192,14 @@ do {									   \
 {									\
 	switch (bpp) {							\
 		case 2: {						\
-			Uint16 pixel;					\
-									\
 			PIXEL_FROM_RGB(pixel, fmt, r, g, b);		\
 			*((Uint16 *)(buf)) = pixel;			\
 		}							\
 		break;							\
 									\
 		case 3: {						\
-                        if(SDL_BYTEORDER == SDL_LIL_ENDIAN) {		\
-			        *((buf)+fmt->Rshift/8) = r;		\
+            if(SDL_BYTEORDER == SDL_LIL_ENDIAN) {		\
+			    *((buf)+fmt->Rshift/8) = r;		\
 				*((buf)+fmt->Gshift/8) = g;		\
 				*((buf)+fmt->Bshift/8) = b;		\
 			} else {					\
@@ -213,8 +211,6 @@ do {									   \
 		break;							\
 									\
 		case 4: {						\
-			Uint32 pixel;					\
-									\
 			PIXEL_FROM_RGB(pixel, fmt, r, g, b);		\
 			*((Uint32 *)(buf)) = pixel;			\
 		}							\
@@ -303,11 +299,11 @@ do {									   \
 		break;							   \
 									   \
 		case 3:	{/* FIXME: broken code (no alpha) */		   \
-		        Uint8 *b = (Uint8 *)buf;			   \
+		        Uint8 *aplha = (Uint8 *)buf;			   \
 			if(SDL_BYTEORDER == SDL_LIL_ENDIAN) {		   \
-			        pixel = b[0] + (b[1] << 8) + (b[2] << 16); \
+			        pixel = aplha[0] + (aplha[1] << 8) + (aplha[2] << 16); \
 			} else {					   \
-			        pixel = (b[0] << 16) + (b[1] << 8) + b[2]; \
+			        pixel = (aplha[0] << 16) + (aplha[1] << 8) + aplha[2]; \
 			}						   \
 		}							   \
 		break;							   \
@@ -332,24 +328,23 @@ do {									   \
 		((b>>fmt->Bloss)<<fmt->Bshift)|				\
 		((a<<fmt->Aloss)<<fmt->Ashift);				\
 }
+
 #define ASSEMBLE_RGBA(buf, bpp, fmt, r, g, b, a)			\
-{									\
+{                                       \
 	switch (bpp) {							\
 		case 2: {						\
-			Uint16 pixel;					\
-									\
 			PIXEL_FROM_RGBA(pixel, fmt, r, g, b, a);	\
 			*((Uint16 *)(buf)) = pixel;			\
 		}							\
 		break;							\
 									\
 		case 3: { /* FIXME: broken code (no alpha) */		\
-                        if(SDL_BYTEORDER == SDL_LIL_ENDIAN) {		\
-			        *((buf)+fmt->Rshift/8) = r;		\
+            if(SDL_BYTEORDER == SDL_LIL_ENDIAN) {		\
+			    *((buf)+fmt->Rshift/8) = r;		\
 				*((buf)+fmt->Gshift/8) = g;		\
 				*((buf)+fmt->Bshift/8) = b;		\
 			} else {					\
-			        *((buf)+2-fmt->Rshift/8) = r;		\
+			    *((buf)+2-fmt->Rshift/8) = r;		\
 				*((buf)+2-fmt->Gshift/8) = g;		\
 				*((buf)+2-fmt->Bshift/8) = b;		\
 			}						\
@@ -357,8 +352,6 @@ do {									   \
 		break;							\
 									\
 		case 4: {						\
-			Uint32 pixel;					\
-									\
 			PIXEL_FROM_RGBA(pixel, fmt, r, g, b, a);	\
 			*((Uint32 *)(buf)) = pixel;			\
 		}							\
