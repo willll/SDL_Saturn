@@ -42,6 +42,9 @@
 *.idb
 *.pdb
 
+# CVS files
+.cvsignore
+
 # Kernel Module Compile Results
 *.mod*
 *.cmd

@@ -32,7 +32,9 @@ static char rcsid =
 #include <stdarg.h>
 #include <string.h>
 
+#ifdef ENABLE_SATURN
 #include "SDL_saturn.h"
+#endif
 
 #include "SDL_types.h"
 #include "SDL_getenv.h"

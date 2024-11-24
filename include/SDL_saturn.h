@@ -21,6 +21,7 @@ extern "C" {
 #endif
 
 #include <sgl.h>
+#include <sl_def.h>
 
 #undef pal
 
