@@ -21,8 +21,6 @@ typedef struct GFS_FILE {
 	Uint32 file_hash; // file hash
 } GFS_FILE;
 
-#define FILE GFS_FILE
-
 /* Seek to 'offset' relative to whence, one of stdio's whence values:
 	SEEK_SET, SEEK_CUR, SEEK_END
 	 Returns the final offset in the data source.

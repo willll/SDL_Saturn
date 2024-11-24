@@ -36,8 +36,6 @@ static char rcsid =
 
 #include "SDL_types.h"
 
-#include "saturn/gfs_wrap.h"
-
 #include "begin_code.h"
 /* Set up for C function definitions, even when using C++ */
 #ifdef __cplusplus

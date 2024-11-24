@@ -8,7 +8,7 @@
 #include "SDL_rwops.h"
 #include "SDL_log.h"
 
-#include <ctype.h> 
+#include <ctype.h>
 
 char 	*strtok (char *__restrict, const char *__restrict);
 int	 strncasecmp(const char *, const char *, size_t) __pure;
@@ -41,7 +41,7 @@ Uint8 dir_depth = 0;
  */
 int sat_seek(struct SDL_RWops *context, int offset, int whence)
 {
-  return sat_fseek(context->hidden.stdio.fp, offset, whence);
+  return sat_fseek((GFS_FILE *)context->hidden.stdio.fp, offset, whence);
 }
 
 /* Read up to 'num' objects each of size 'objsize' from the data
@@ -50,7 +50,7 @@ int sat_seek(struct SDL_RWops *context, int offset, int whence)
  */
 int sat_read(struct SDL_RWops *context, void *ptr, int size, int maxnum)
 {
-  return sat_fread(ptr, size, maxnum, context->hidden.stdio.fp);
+  return sat_fread(ptr, size, maxnum, (GFS_FILE *)context->hidden.stdio.fp);
 }
 
 /* Write exactly 'num' objects each of size 'objsize' from the area
@@ -59,13 +59,13 @@ int sat_read(struct SDL_RWops *context, void *ptr, int size, int maxnum)
  */
 int sat_write(struct SDL_RWops *context, const void *ptr, int size, int num)
 {
-  return sat_fwrite(ptr, size, num, context->hidden.stdio.fp);
+  return sat_fwrite(ptr, size, num, (GFS_FILE *)context->hidden.stdio.fp);
 }
 
 /* Close and free an allocated SDL_FSops structure */
 int sat_close(struct SDL_RWops *context)
 {
-  sat_fclose(context->hidden.stdio.fp);
+  sat_fclose((GFS_FILE *)context->hidden.stdio.fp);
   free(context);
   return 0; // always ok :-)
 }
