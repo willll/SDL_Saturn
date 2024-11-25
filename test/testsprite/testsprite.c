@@ -18,7 +18,7 @@ do {
 DMA_ScuMemCopy((uint8*)(SpriteVRAM + cgaddress), (uint8*)rgb, 12*16*4);
     SCU_DMAWait();
 
-    TEXTURE *txptr = (TEXTURE *)&tex_spr[1]; 
+    TEXTURE *txptr = (TEXTURE *)&tex_spr[1];
     *txptr = TEXDEF(w, (16>>6), 0);
 //SWAP(_txt1Layer, _txt2Layer);
     SPRITE user_sprite;
@@ -183,7 +183,7 @@ int main(int argc, char *argv[])
 		SDL_LogCritical(SDL_LOG_CATEGORY_APPLICATION, "Couldn't initialize SDL: %s\n",SDL_GetError());
 		exit(1);
 	}
-	atexit(SDL_Quit);
+	//atexit(SDL_Quit);
 
 	SDL_LogSetPriority(SDL_LOG_CATEGORY_APPLICATION, SDL_LOG_PRIORITY_VERBOSE);
 	SDL_LogSetPriority(SDL_LOG_CATEGORY_SYSTEM, SDL_LOG_PRIORITY_VERBOSE);

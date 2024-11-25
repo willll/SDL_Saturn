@@ -77,6 +77,7 @@ target_link_options(
     ${TARGET_NAME}.elf PUBLIC
     "SHELL:-Xlinker -Map -Xlinker ${TARGET_NAME}.map"
     "SHELL:-Xlinker --strip-debug"
+    "SHELL: -specs=nosys.specs"
     "SHELL:-Xlinker -fno-lto"
     "SHELL:-m2 -nostartfiles"
     "SHELL:-T${SATURN_COMMON}/Saturn.lnk"
@@ -109,6 +110,7 @@ target_link_libraries( ${TARGET_NAME}.elf PUBLIC ${SEGALIB}/lib/sega_cdc.a )
 target_link_libraries( ${TARGET_NAME}.elf PUBLIC ${SEGALIB}/lib/sega_clib.a )
 target_link_libraries( ${TARGET_NAME}.elf PUBLIC ${SEGALIB}/lib/sega_per_vbt.a )
 target_link_libraries( ${TARGET_NAME}.elf PUBLIC ${SEGALIB}/lib/sega_int.a )
+target_link_libraries( ${TARGET_NAME}.elf PUBLIC ${SEGALIB}/lib/sega_mth.a )
 
 install(FILES ${PROJECT_SOURCE_DIR}/sail.bmp
             DESTINATION ${INSTALL_DESTINATION}/${TARGET_PATH}/CD

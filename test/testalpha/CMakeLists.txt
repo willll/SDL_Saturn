@@ -77,6 +77,7 @@ target_link_options(
     ${TARGET_NAME}.elf PUBLIC
     "SHELL:-Xlinker -Map -Xlinker ${TARGET_NAME}.map"
     "SHELL:-Xlinker --strip-debug"
+    "SHELL: -specs=nosys.specs"
     "SHELL:-Xlinker -fno-lto"
     "SHELL:-m2 -nostartfiles"
     "SHELL:-T${SATURN_COMMON}/Saturn.lnk"

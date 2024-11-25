@@ -29,8 +29,8 @@ static Uint32 ticktock(Uint32 interval)
 
 static Uint32 callback(Uint32 interval, void *param)
 {
-  sprintf(text_buffer, ("Timer %d : param = %d\n", interval, (int)param));
-	slPrint(text_buffer, slLocate (1,line++));
+  sprintf(text_buffer, "Timer %d : param = %d\n", (int)interval, (int)param);
+  slPrint(text_buffer, slLocate (1,line++));
   return interval;
 }
 
@@ -52,7 +52,7 @@ int main()
 	SDL_SetVideoMode(320, 240, 8, SDL_HWSURFACE);
 	SDL_ShowCursor(0);
 
-	atexit(SDL_Quit);
+	//atexit(SDL_Quit);
 
 	/* Start the timer */
 	desired = 0;

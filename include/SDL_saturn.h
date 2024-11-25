@@ -30,6 +30,7 @@ extern "C" {
 #include <sega_gfs.h>
 #include <sega_tim.h>
 #include <sega_mem.h>
+#include <sega_mth.h>
 
 #define	NBG1_MAP_ADR	(VDP2_VRAM_B1 + 0x18000)
 #define BACK_COL_ADR    (VDP2_VRAM_A1 + 0x1fffe)
@@ -46,6 +47,11 @@ static    unsigned long	  __heap[SZ_HEAP];
 #define free(X) MEM_Free(X)
 #define realloc(X, Y) MEM_Realloc((X), (Y))
 #define calloc(X, Y) MEM_Calloc((X), (Y))
+
+#define srand(X)    MTH_InitialRand((X))
+#define rand        MTH_GetRand
+
+#define exit(X)    MTH_InitialRand((X))
 
 #define SDL_malloc(X) MEM_Malloc(X)
 #define SDL_free(X) MEM_Free(X)

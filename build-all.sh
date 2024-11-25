@@ -11,7 +11,7 @@ rm -rf $BUILT_FOLDER/* \
       -DCMAKE_TOOLCHAIN_FILE=$SATURN_CMAKE/sega_saturn.cmake \
       -DCMAKE_INSTALL_PREFIX=$SDL_PATH . || exit 1
 
-make VERBOSE=1  -f Makefile -C $BUILT_FOLDER || exit 1
+make VERBOSE=1 -j -f Makefile -C $BUILT_FOLDER || exit 1
 
 make VERBOSE=1 -j -f Makefile -C $BUILT_FOLDER install || exit 1
 

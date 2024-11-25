@@ -145,7 +145,7 @@ int main(/*int argc, char **argv*/)
   SDL_LogSetPriority(SDL_LOG_CATEGORY_VIDEO, SDL_LOG_PRIORITY_VERBOSE);
   SDL_LogSetPriority(SDL_LOG_CATEGORY_RENDER, SDL_LOG_PRIORITY_VERBOSE);
 
-  atexit(SDL_Quit);
+  //atexit(SDL_Quit);
 
   vidflags = (SDL_HWSURFACE | SDL_FULLSCREEN);
 

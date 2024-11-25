@@ -1,6 +1,7 @@
 /*
 * https://www.badprog.com/c-sdl-simple-directmedia-layer-hello-world
 */
+#include <string.h>
 
 #include <SDL.h>
 

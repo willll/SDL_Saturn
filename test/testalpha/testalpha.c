@@ -334,7 +334,7 @@ int main(/*int argc, char *argv[]*/)
 		SDL_SetError(text_buffer);
 		for(;;);
 	}
-	atexit(SDL_Quit);
+	//atexit(SDL_Quit);
 
 	SDL_LogSetPriority(SDL_LOG_CATEGORY_APPLICATION, SDL_LOG_PRIORITY_VERBOSE);
 	SDL_LogSetPriority(SDL_LOG_CATEGORY_SYSTEM, SDL_LOG_PRIORITY_VERBOSE);
